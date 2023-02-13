@@ -1,3 +1,4 @@
+using RadencyDataProcessing.PaymentTransactions;
 using System.ComponentModel.DataAnnotations;
 
 namespace RadencyDataProcessing
@@ -29,12 +30,12 @@ namespace RadencyDataProcessing
                 {
                     throw new ValidationException("Validation exception. ");
                 }
-                while (!stoppingToken.IsCancellationRequested)
-                {
-                    await Task.WhenAll(
-                        _paymentTransactionsProcessing.ReadData(stoppingToken)
-                        );
-                }
+                //while (!stoppingToken.IsCancellationRequested)
+                //{
+                await Task.WhenAll(
+                    _paymentTransactionsProcessing.ReadData(stoppingToken)
+                    );
+                //}
             }
             catch (ValidationException ex)
             {
