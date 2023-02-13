@@ -1,4 +1,5 @@
 using RadencyDataProcessing;
+using RadencyDataProcessing.PaymentTransactions;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
