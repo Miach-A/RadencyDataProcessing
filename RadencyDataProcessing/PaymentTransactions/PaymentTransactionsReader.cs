@@ -7,10 +7,13 @@ namespace RadencyDataProcessing
     public class PaymentTransactionsReader : IPaymentTransactionsReader
     {
         private readonly NumberFormatInfo _numberFormatInfo;
+        private readonly DateTimeFormatInfo _dateTimeFormatInfo;
         public PaymentTransactionsReader()
         {
             _numberFormatInfo = new NumberFormatInfo();
             _numberFormatInfo.NumberDecimalSeparator = ".";
+
+            _dateTimeFormatInfo = new DateTimeFormatInfo();
         }
         public async Task<PaymentTransactionReadResult> Read(string path)
         {
@@ -71,8 +74,9 @@ namespace RadencyDataProcessing
                 if (s.Length == 0) return false;
             }
 
+
             if (Decimal.TryParse(strings[3], _numberFormatInfo, out decimal payment) == false) return false;
-            if (DateTime.TryParse(strings[4], out DateTime date) == false) return false;
+            if (DateTime.TryParseExact(strings[4], "yyyy-dd-MM", _dateTimeFormatInfo, DateTimeStyles.None, out DateTime date) == false) return false;
             if (long.TryParse(strings[5], out long accountNumber) == false) return false;
 
             entry.FirstName = strings[0];
@@ -93,18 +97,19 @@ namespace RadencyDataProcessing
             bool isInQuotes = false;
             for (int currentPosition = 0; currentPosition < input.Length; currentPosition++)
             {
-                if (input[currentPosition] == '\"' || input[currentPosition] == (char)8220 || input[currentPosition] == (char)8221)
+                if (input[currentPosition] == (char)34 || input[currentPosition] == (char)8220 || input[currentPosition] == (char)8221)
                 {
                     isInQuotes = !isInQuotes;
                 }
                 else if (input[currentPosition].ToString() == separator && !isInQuotes) //','
                 {
-                    tokens.Add(input.Substring(startPosition, currentPosition - startPosition).Trim());
+                    var resStr = input.Substring(startPosition, currentPosition - startPosition).Trim((char)32, (char)34, (char)8220, (char)8221);
+                    tokens.Add(resStr);
                     startPosition = currentPosition + 1;
                 }
             }
 
-            string lastToken = input.Substring(startPosition);
+            string lastToken = input.Substring(startPosition).Trim((char)32, (char)34, (char)8220, (char)8221);
             if (lastToken.Equals(separator))
             {
                 tokens.Add("");
