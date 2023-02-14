@@ -30,16 +30,15 @@ namespace RadencyDataProcessing
                 ReadTxt(path, result);
             }
 
-
             return result;
         }
 
         private void ReadTxt(string path, IPaymentTransactionReadResult result)
         {
-            List<IPaymentTransactionEntry> resList = new List<IPaymentTransactionEntry>();
-            List<string> ErrorList = new List<string>();
+            List<IPaymentTransactionEntry> resList = new();
+            List<string> ErrorList = new();
 
-            StreamReader reader = new StreamReader(path);
+            StreamReader reader = new(path);
             string? data;
 
             data = reader.ReadLine();
@@ -64,7 +63,7 @@ namespace RadencyDataProcessing
 
         private List<string> SplitIgnoreQuotes(string input, string separator)
         {
-            List<string> tokens = new List<string>();
+            List<string> tokens = new();
             int startPosition = 0;
             bool isInQuotes = false;
             for (int currentPosition = 0; currentPosition < input.Length; currentPosition++)
