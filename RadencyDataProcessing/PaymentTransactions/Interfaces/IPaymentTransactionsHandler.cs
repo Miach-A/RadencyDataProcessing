@@ -1,7 +1,9 @@
-﻿namespace RadencyDataProcessing.PaymentTransactions.Interfaces
+﻿using RadencyDataProcessing.PaymentTransactions.Models;
+
+namespace RadencyDataProcessing.PaymentTransactions.Interfaces
 {
     public interface IPaymentTransactionsHandler
     {
-        public Task Handle(IEnumerable<IPaymentEntry> paymentEntries);
+        public Task Handle(PaymentTransactionReadResult paymentEntries);
     }
 }

@@ -25,6 +25,7 @@ try
             });
 
             services.AddSingleton(typeof(IPaymentTransactionsReader), typeof(PaymentTransactionsReader));
+            services.AddSingleton(typeof(IPaymentTransactionsHandler), typeof(PaymentTransactionsHandler));
             services.AddSingleton(typeof(IPaymentTransactionsProcessing), typeof(PaymentTransactionsProcessing));
             services.AddHostedService<Worker>();
         })
