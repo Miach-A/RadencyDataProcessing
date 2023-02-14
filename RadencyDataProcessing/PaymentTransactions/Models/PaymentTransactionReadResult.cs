@@ -2,11 +2,10 @@
 
 namespace RadencyDataProcessing.PaymentTransactions.Models
 {
-    public class PaymentTransactionReadResult
+    public class PaymentTransactionReadResult : IPaymentTransactionReadResult
     {
-        public IEnumerable<IPaymentEntry> Entry { get; set; } = new List<IPaymentEntry>();
+        public IEnumerable<IPaymentTransactionEntry> Entries { get; set; } = new List<IPaymentTransactionEntry>();
         public string ReadFilePath { get; set; } = string.Empty;
-        //public string ErrorFilePath { get; set; } = string.Empty;
         public IEnumerable<string> ErrorLines { get; set; } = new List<string>();
         public bool Skip { get; set; } = false;
 

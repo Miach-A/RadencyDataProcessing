@@ -8,20 +8,22 @@ namespace RadencyDataProcessing.PaymentTransactions
         private readonly ILogger<Worker> _logger;
         private readonly string _innerDataDirectory;
         private readonly string _outgoingDataDirectory;
+        private readonly IPaymentTransactionFactory _paymentTransactionFactory;
         private readonly IPaymentTransactionsReader _paymentTransactionsReader;
         private readonly IPaymentTransactionsHandler _paymentTransactionsHandler;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionsReader paymentTransactionsReader,
-            IPaymentTransactionsHandler paymentTransactionsHandler)
+            IPaymentTransactionFactory paymentTransactionFactory
+            )
         {
             _logger = logger;
             _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
-            _paymentTransactionsReader = paymentTransactionsReader;
-            _paymentTransactionsHandler = paymentTransactionsHandler;
+            _paymentTransactionFactory = paymentTransactionFactory;
+            _paymentTransactionsReader = _paymentTransactionFactory.CreatePaymentTransactionsReader();
+            _paymentTransactionsHandler = _paymentTransactionFactory.CreatePaymentTransactionsHandler();
         }
 
         public async Task TransactionProcessing(CancellationToken stoppingToken)
