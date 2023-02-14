@@ -1,5 +1,4 @@
 using RadencyDataProcessing.PaymentTransactions;
-using System.ComponentModel.DataAnnotations;
 
 namespace RadencyDataProcessing
 {
@@ -26,20 +25,9 @@ namespace RadencyDataProcessing
         {
             try
             {
-                if (!ValidateConfiguration())
-                {
-                    throw new ValidationException("Validation exception. ");
-                }
-                //while (!stoppingToken.IsCancellationRequested)
-                //{
                 await Task.WhenAll(
                     _paymentTransactionsProcessing.ReadData(stoppingToken)
                     );
-                //}
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogCritical("{exeption}", ex.Message);
             }
             catch (Exception ex)
             {
@@ -49,25 +37,6 @@ namespace RadencyDataProcessing
             {
                 _hostApplicationLifetime.StopApplication();
             }
-
-        }
-
-        private bool ValidateConfiguration()
-        {
-            bool ValidationPassed = true;
-            if (_configuration.GetValue<string>("InnerDataPath") == null)
-            {
-                _logger.LogError("Set InnerDataPath in config file. ");
-                ValidationPassed = false;
-            }
-
-            if (_configuration.GetValue<string>("OutgoingDataPath") == null)
-            {
-                _logger.LogError("Set OutgoingDataPath in config file. ");
-                ValidationPassed = false;
-            }
-
-            return ValidationPassed;
         }
     }
 }

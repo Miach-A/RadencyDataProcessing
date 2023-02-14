@@ -1,53 +1,68 @@
-﻿namespace RadencyDataProcessing.PaymentTransactions
+﻿using Microsoft.Extensions.Options;
+
+namespace RadencyDataProcessing.PaymentTransactions
 {
     public class PaymentTransactionsProcessing
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IConfiguration _configuration;
+        private readonly string _innerDataDirectory;
+        private readonly string _outgoingDataDirectory;
+
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
-            IConfiguration configuration)
+            IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration)
         {
             _logger = logger;
-            _configuration = configuration;
+            _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
+            _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
+            Console.WriteLine(_innerDataDirectory);
+            Console.WriteLine(_outgoingDataDirectory);
         }
+
+        private void ValidateConfiguration()
+        {
+            if (_innerDataDirectory == string.Empty
+                || _outgoingDataDirectory == string.Empty)
+            {
+                throw new ArgumentException("appsettings.json -> InnerDataDirectory / OutgoingDataDirectory");
+            }
+        }
+
         public async Task ReadData(CancellationToken stoppingToken)
         {
-            var directory = _configuration.GetValue<string>("InnerDataPath");
-            if (directory == null)
+            var InProgressDirectory = Path.Combine(_innerDataDirectory, "InProgress");
+            CreateDirectoryIfNotExist(InProgressDirectory);
+
+            var filesNotProcessedLastTime = Directory.GetFiles(InProgressDirectory);
+            foreach (var file in filesNotProcessedLastTime)
             {
-                throw new ArgumentNullException("appsettings.json -> InnerDataPath");
+                Directory.Move(file, Path.Combine(_innerDataDirectory, Path.GetFileName(file)));
             }
 
-            var InProgressDirectoryPath = Path.Combine(directory, "InProgress");
-            if (!Directory.Exists(InProgressDirectoryPath))
-            {
-                Directory.CreateDirectory(InProgressDirectoryPath);
-            }
-
-            //var filesNotProcessedLastTime = Directory.GetFiles(InProgressDirectoryPath); 
-            //foreach (var file in filesNotProcessedLastTime)
-            //{
-            //    Directory.Move()
-            //}
-
-            var ProcessedDirectoryPath = Path.Combine(directory, "Processed");
-            if (!Directory.Exists(ProcessedDirectoryPath))
-            {
-                Directory.CreateDirectory(ProcessedDirectoryPath);
-            }
+            var ProcessedDirectory = Path.Combine(_innerDataDirectory, "Processed");
+            CreateDirectoryIfNotExist(ProcessedDirectory);
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 //Read files. Move to folder "in progress". While reading is in progress, can get a new list after N seconds and process it too
-                //after processing, move to the "processed" folder
-
-                var files = Directory.GetFiles(directory);
-
-
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                //after processing, move to the "processed" folder  
+                _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
+                //ProcessFiles();
                 await Task.Delay(1000, stoppingToken);
+            }
+        }
 
+        private async Task ProcessFiles()
+        {
+            var files = Directory.GetFiles(_innerDataDirectory);
+            await Task.Delay(1000);
+        }
+
+        private void CreateDirectoryIfNotExist(string directory)
+        {
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
             }
         }
     }
