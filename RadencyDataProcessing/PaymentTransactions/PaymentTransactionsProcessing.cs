@@ -15,17 +15,6 @@ namespace RadencyDataProcessing.PaymentTransactions
             _logger = logger;
             _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
-            Console.WriteLine(_innerDataDirectory);
-            Console.WriteLine(_outgoingDataDirectory);
-        }
-
-        private void ValidateConfiguration()
-        {
-            if (_innerDataDirectory == string.Empty
-                || _outgoingDataDirectory == string.Empty)
-            {
-                throw new ArgumentException("appsettings.json -> InnerDataDirectory / OutgoingDataDirectory");
-            }
         }
 
         public async Task ReadData(CancellationToken stoppingToken)
@@ -47,7 +36,7 @@ namespace RadencyDataProcessing.PaymentTransactions
                 //Read files. Move to folder "in progress". While reading is in progress, can get a new list after N seconds and process it too
                 //after processing, move to the "processed" folder  
                 _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
-                //ProcessFiles();
+                Task ParallelProcessing = ProcessFiles();
                 await Task.Delay(1000, stoppingToken);
             }
         }

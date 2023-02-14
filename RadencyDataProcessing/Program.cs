@@ -1,18 +1,38 @@
 using RadencyDataProcessing;
+using RadencyDataProcessing.Extensions;
 using RadencyDataProcessing.PaymentTransactions;
 using RadencyDataProcessing.PaymentTransactions.Interfaces;
 
+try
+{
+    IHost host = Host.CreateDefaultBuilder(args)
 
+        .ConfigureServices((context, services) =>
+        {
+            services.Configure<PaymentTransactionsConfiguration>(context.Configuration.GetSection("PaymentTransactions"));
 
-IHost host = Host.CreateDefaultBuilder(args)
+            services.PostConfigure<PaymentTransactionsConfiguration>(settings =>
+            {
+                var configErrors = settings.ValidationErrors().ToArray();
+                if (configErrors.Any())
+                {
+                    var aggrErrors = string.Join(",", configErrors);
+                    var count = configErrors.Length;
+                    var configType = settings.GetType().Name;
+                    throw new ApplicationException(
+                        $"Found {count} configuration error(s) in {configType}: {aggrErrors}");
+                }
+            });
 
-    .ConfigureServices((context, services) =>
-    {
-        services.Configure<PaymentTransactionsConfiguration>(context.Configuration.GetSection("PaymentTransactions"));
-        services.AddSingleton(typeof(IPaymentTransactionsReader), typeof(PaymentTransactionsReader));
-        services.AddSingleton<PaymentTransactionsProcessing>();
-        services.AddHostedService<Worker>();
-    })
-    .Build();
+            services.AddSingleton(typeof(IPaymentTransactionsReader), typeof(PaymentTransactionsReader));
+            services.AddSingleton<PaymentTransactionsProcessing>();
+            services.AddHostedService<Worker>();
+        })
+        .Build();
 
-host.Run();
+    host.Run();
+}
+catch (ApplicationException ex)
+{
+    Console.WriteLine(ex.Message);
+}
