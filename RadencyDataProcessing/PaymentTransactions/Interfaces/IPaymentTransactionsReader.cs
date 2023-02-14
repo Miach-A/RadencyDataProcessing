@@ -2,6 +2,6 @@
 {
     public interface IPaymentTransactionsReader
     {
-        public List<IPaymentEntry> Read();
+        public Task<IEnumerable<IPaymentEntry>> Read(string path);
     }
 }

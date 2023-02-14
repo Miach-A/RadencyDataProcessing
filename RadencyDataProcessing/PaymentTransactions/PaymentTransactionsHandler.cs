@@ -2,9 +2,9 @@
 
 namespace RadencyDataProcessing
 {
-    public class PaymentTransactionsReader : IPaymentTransactionsReader
+    public class PaymentTransactionsHandler : IPaymentTransactionsHandler
     {
-        public async Task<IEnumerable<IPaymentEntry>> Read(string path)
+        public Task Handle(IEnumerable<IPaymentEntry> paymentEntries)
         {
             throw new NotImplementedException();
         }
