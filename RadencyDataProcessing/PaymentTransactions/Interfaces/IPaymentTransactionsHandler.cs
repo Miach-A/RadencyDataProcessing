@@ -2,6 +2,6 @@
 {
     public interface IPaymentTransactionsHandler
     {
-        public Task Handle();
+        public Task Handle(IEnumerable<IPaymentEntry> paymentEntries);
     }
 }

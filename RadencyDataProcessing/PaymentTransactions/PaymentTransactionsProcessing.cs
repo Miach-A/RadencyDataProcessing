@@ -9,16 +9,19 @@ namespace RadencyDataProcessing.PaymentTransactions
         private readonly string _innerDataDirectory;
         private readonly string _outgoingDataDirectory;
         private readonly IPaymentTransactionsReader _paymentTransactionsReader;
+        private readonly IPaymentTransactionsHandler _paymentTransactionsHandler;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionsReader paymentTransactionsReader)
+            IPaymentTransactionsReader paymentTransactionsReader,
+            IPaymentTransactionsHandler paymentTransactionsHandler)
         {
             _logger = logger;
             _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
             _paymentTransactionsReader = paymentTransactionsReader;
+            _paymentTransactionsHandler = paymentTransactionsHandler;
         }
 
         public async Task TransactionProcessing(CancellationToken stoppingToken)
@@ -67,7 +70,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             for (int i = 0; i < files.Length; i++)
             {
                 var ParallelProcessing = _paymentTransactionsReader.Read(files[i])
-                    .ContinueWith(result => 1);
+                    .ContinueWith(result => _paymentTransactionsHandler.Handle(result.Result));
             }
 
             await Task.Delay(1000);
