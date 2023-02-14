@@ -5,9 +5,10 @@ namespace RadencyDataProcessing
 {
     public class PaymentTransactionsHandler : IPaymentTransactionsHandler
     {
-        public Task Handle(PaymentTransactionReadResult readResult)
+        public async Task Handle(PaymentTransactionReadResult readResult)
         {
-            throw new NotImplementedException();
+            var n = 1;
+            return;
         }
     }
 }

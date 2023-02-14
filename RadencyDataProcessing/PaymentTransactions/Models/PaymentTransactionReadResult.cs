@@ -7,7 +7,7 @@ namespace RadencyDataProcessing.PaymentTransactions.Models
         public IEnumerable<IPaymentEntry> Entry { get; set; } = new List<IPaymentEntry>();
         public string ReadFilePath { get; set; } = string.Empty;
         //public string ErrorFilePath { get; set; } = string.Empty;
-        public IEnumerable<string> ErrorLines { get; set; }
+        public IEnumerable<string> ErrorLines { get; set; } = new List<string>();
         public bool Skip { get; set; } = false;
 
     }

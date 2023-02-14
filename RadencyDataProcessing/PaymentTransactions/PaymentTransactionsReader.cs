@@ -7,24 +7,30 @@ namespace RadencyDataProcessing
     {
         public async Task<PaymentTransactionReadResult> Read(string path)
         {
+            var result = new PaymentTransactionReadResult();
+            result.ReadFilePath = path;
+
             var fileExtension = Path.GetExtension(path);
             if (fileExtension != ".txt"
                 && fileExtension != ".csv")
             {
-                return new PaymentTransactionReadResult() { Skip = true };
+                result.Skip = true;
+                return result;
             }
 
             if (fileExtension == ".txt")
             {
-                ReadTxt(path);
+                ReadTxt(path, result);
             }
 
-            return new PaymentTransactionReadResult();
+
+            return result;
         }
 
-        private void ReadTxt(string path)
+        private void ReadTxt(string path, PaymentTransactionReadResult result)
         {
             List<PaymentTransactionEntry> resList = new List<PaymentTransactionEntry>();
+            List<string> ErrorList = new List<string>();
 
             StreamReader reader = new StreamReader(path);
             string? data;
@@ -37,8 +43,14 @@ namespace RadencyDataProcessing
                 {
                     resList.Add(entry);
                 }
+                else
+                {
+                    ErrorList.Add(data);
+                }
             }
 
+            result.Entry = resList;
+            result.ErrorLines = ErrorList;
         }
 
         private bool CreateEntry(string[] strings, out PaymentTransactionEntry entry)
