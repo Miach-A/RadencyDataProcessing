@@ -1,5 +1,4 @@
 ﻿using RadencyDataProcessing.PaymentTransactions.Interfaces;
-using System.Globalization;
 
 namespace RadencyDataProcessing.PaymentTransactions.Models
 {
@@ -14,37 +13,19 @@ namespace RadencyDataProcessing.PaymentTransactions.Models
         public string Service { get; set; } = string.Empty;
         public bool SetData<T>(T data)
         {
-            if (data is string[] strings)
+            if ((data is object[] strings) && strings.Count() == 7)
             {
-                //put in the parser class? 
-                var _numberFormatInfo = new NumberFormatInfo();
-                _numberFormatInfo.NumberDecimalSeparator = ".";
-                var _dateTimeFormatInfo = new DateTimeFormatInfo();
-
-                if (strings.Count() != 7) return false;
-                foreach (string s in strings)
-                {
-                    if (s.Length == 0) return false;
-                }
-
-                if (Decimal.TryParse(strings[3], _numberFormatInfo, out decimal payment) == false) return false;
-                if (DateTime.TryParseExact(strings[4], "yyyy-dd-MM", _dateTimeFormatInfo, DateTimeStyles.None, out DateTime date) == false) return false;
-                if (long.TryParse(strings[5], out long accountNumber) == false) return false;
-
-                FirstName = strings[0];
-                LastName = strings[1];
-                Address = strings[2];
-                Payment = payment;
-                Date = date;
-                AccountNumber = accountNumber;
-                Service = strings[6];
-
+                FirstName = (string)strings[0];
+                LastName = (string)strings[1];
+                Address = (string)strings[2];
+                Payment = (decimal)strings[3];
+                Date = (DateTime)strings[4];
+                AccountNumber = (long)strings[5];
+                Service = (string)strings[6];
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
     }
 }

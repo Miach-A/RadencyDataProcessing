@@ -10,24 +10,24 @@ namespace RadencyDataProcessing.PaymentTransactions
             return new PaymentTransactionEntry();
         }
 
-        public IPaymentTransactionParser<IEnumerable<string>> CreatePaymentTransactionParser()
-        {
-            return new PaymentTransactionParser();
-        }
-
         public IPaymentTransactionParseResult CreatePaymentTransactionReadResult()
         {
             return new PaymentTransactionParseResult();
         }
 
-        public IPaymentTransactionHandler CreatePaymentTransactionsHandler()
-        {
-            return new PaymentTransactionsHandler();
-        }
+        //public IPaymentTransactionParser<IEnumerable<string>> CreatePaymentTransactionParser()
+        //{
+        //    return new PaymentTransactionParser(this);
+        //}
 
-        public IPaymentTransactionReader<IEnumerable<string>> CreatePaymentTransactionsReader()
-        {
-            return new PaymentTransactionsReader();
-        }
+        //public IPaymentTransactionHandler CreatePaymentTransactionsHandler()
+        //{
+        //    return new PaymentTransactionsHandler();
+        //}
+
+        //public IPaymentTransactionReader<IEnumerable<string>> CreatePaymentTransactionsReader()
+        //{
+        //    return new PaymentTransactionsReader();
+        //}
     }
 }

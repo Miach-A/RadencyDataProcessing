@@ -7,7 +7,6 @@
         IPaymentTransactionReader<T> Reader { get; }
         IPaymentTransactionHandler Handler { get; }
         IPaymentTransactionParser<T> Parser { get; }
-        IPaymentTransactionEntry NewEntry();
-
+        IPaymentTransactionFactory<T> Factory { get; }
     }
 }

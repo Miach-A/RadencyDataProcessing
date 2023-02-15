@@ -66,8 +66,6 @@ namespace RadencyDataProcessing.PaymentTransactions
 
             foreach (var file in files)
             {
-                //var ParallelProcessing = _paymentTransactionManager.Reader.ReadAsync(file)
-                //    .ContinueWith(result => _paymentTransactionManager.Handler.Handle(result.Result));
                 var ParallelProcessing = Task.Run(() => ProcessFileAsync(file));
             }
         }

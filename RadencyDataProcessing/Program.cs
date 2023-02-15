@@ -24,6 +24,10 @@ try
                 }
             });
 
+            services.AddSingleton(typeof(IPaymentTransactionReader<IEnumerable<string>>), typeof(PaymentTransactionsReader));
+            services.AddSingleton(typeof(IPaymentTransactionParser<IEnumerable<string>>), typeof(PaymentTransactionParser));
+            services.AddSingleton(typeof(IPaymentTransactionHandler), typeof(PaymentTransactionsHandler));
+
             services.AddSingleton(typeof(IPaymentTransactionFactory<IEnumerable<string>>), typeof(PaymentTransactionFactory));
             services.AddSingleton(typeof(IPaymentTransactionManager<IEnumerable<string>>), typeof(PaymentTransactionManager));
             services.AddSingleton(typeof(IPaymentTransactionProcessing), typeof(PaymentTransactionsProcessing));
