@@ -20,9 +20,9 @@ namespace RadencyDataProcessing.PaymentTransactions
             return new PaymentTransactionsHandler();
         }
 
-        public IPaymentTransactionReader CreatePaymentTransactionsReader()
+        public IPaymentTransactionReader<IEnumerable<string>> CreatePaymentTransactionsReader()
         {
-            return new PaymentTransactionsReader(this);
+            return new PaymentTransactionsReader<IEnumerable<string>(this);
         }
     }
 }
