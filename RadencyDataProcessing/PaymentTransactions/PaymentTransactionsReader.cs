@@ -2,7 +2,7 @@
 
 namespace RadencyDataProcessing
 {
-    public class PaymentTransactionsReader : IPaymentTransactionsReader
+    public class PaymentTransactionsReader : IPaymentTransactionReader<IEnumerable<string>>
     {
         //private readonly NumberFormatInfo _numberFormatInfo;
         //private readonly DateTimeFormatInfo _dateTimeFormatInfo;
@@ -12,28 +12,23 @@ namespace RadencyDataProcessing
         {
             _paymentTransactionFactory = transactionFactory;
         }
-        public async Task<IPaymentTransactionReadResult> Read(string path)
+        public async IAsyncEnumerable<IEnumerable<string>> ReadAsync(string path)
+        {
+            //return await Task.Run(() => Read(path));
+
+        }
+
+        private IPaymentTransactionParseResult Read(string path)
         {
             var result = _paymentTransactionFactory.CreatePaymentTransactionReadResult();
             result.ReadFilePath = path;
 
-            var fileExtension = Path.GetExtension(path);
-            if (fileExtension != ".txt"
-                && fileExtension != ".csv")
-            {
-                result.Skip = true;
-                return result;
-            }
-
-            if (fileExtension == ".txt")
-            {
-                ReadTxt(path, result);
-            }
+            ReadTxt(path, result);
 
             return result;
         }
 
-        private void ReadTxt(string path, IPaymentTransactionReadResult result)
+        private void ReadTxt(string path, IPaymentTransactionParseResult result)
         {
             List<IPaymentTransactionEntry> resList = new();
             List<string> ErrorList = new();

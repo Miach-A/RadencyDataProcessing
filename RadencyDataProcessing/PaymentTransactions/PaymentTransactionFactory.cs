@@ -10,17 +10,17 @@ namespace RadencyDataProcessing.PaymentTransactions
             return new PaymentTransactionEntry();
         }
 
-        public IPaymentTransactionReadResult CreatePaymentTransactionReadResult()
+        public IPaymentTransactionParseResult CreatePaymentTransactionReadResult()
         {
-            return new PaymentTransactionReadResult();
+            return new PaymentTransactionParseResult();
         }
 
-        public IPaymentTransactionsHandler CreatePaymentTransactionsHandler()
+        public IPaymentTransactionHandler CreatePaymentTransactionsHandler()
         {
             return new PaymentTransactionsHandler();
         }
 
-        public IPaymentTransactionsReader CreatePaymentTransactionsReader()
+        public IPaymentTransactionReader CreatePaymentTransactionsReader()
         {
             return new PaymentTransactionsReader(this);
         }

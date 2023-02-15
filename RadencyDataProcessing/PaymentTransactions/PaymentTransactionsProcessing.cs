@@ -3,59 +3,52 @@ using RadencyDataProcessing.PaymentTransactions.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionsProcessing : IPaymentTransactionsProcessing
+    public class PaymentTransactionsProcessing : IPaymentTransactionProcessing
     {
         private readonly ILogger<Worker> _logger;
-        private readonly string _innerDataDirectory;
-        private readonly string _outgoingDataDirectory;
-        private readonly IPaymentTransactionFactory _paymentTransactionFactory;
-        private readonly IPaymentTransactionsReader _paymentTransactionsReader;
-        private readonly IPaymentTransactionsHandler _paymentTransactionsHandler;
+        private readonly IPaymentTransactionManager _paymentTransactionManager;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionFactory paymentTransactionFactory
+            IPaymentTransactionManager paymentTransactionManager
             )
         {
             _logger = logger;
-            _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
-            _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
-            _paymentTransactionFactory = paymentTransactionFactory;
-            _paymentTransactionsReader = _paymentTransactionFactory.CreatePaymentTransactionsReader();
-            _paymentTransactionsHandler = _paymentTransactionFactory.CreatePaymentTransactionsHandler();
+            _paymentTransactionManager = paymentTransactionManager;
         }
 
         public async Task TransactionProcessing(CancellationToken stoppingToken)
         {
-            var InProgressDirectory = Path.Combine(_innerDataDirectory, "InProgress");
+            var InProgressDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "InProgress");
             CreateDirectoryIfNotExist(InProgressDirectory);
 
             var filesNotProcessedLastTime = Directory.GetFiles(InProgressDirectory);
             foreach (var file in filesNotProcessedLastTime)
             {
-                Directory.Move(file, Path.Combine(_innerDataDirectory, Path.GetFileName(file).Substring(NewInProgressPrefix().Length))); // or magic numbers antipattern 37 = Guid.NewGuid() + "_"
+                Directory.Move(file, Path.Combine(_paymentTransactionManager.InnerDataDirectory, Path.GetFileName(file).Substring(NewInProgressPrefix().Length))); // or magic numbers antipattern 37 = Guid.NewGuid() + "_"
             }
 
-            var ProcessedDirectory = Path.Combine(_innerDataDirectory, "Processed");
+            var ProcessedDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "Processed");
             CreateDirectoryIfNotExist(ProcessedDirectory);
             while (!stoppingToken.IsCancellationRequested)
             {
                 //Read files. Move to folder "in progress". While reading is in progress, can get a new list after N seconds and process it too
                 //after processing, move to the "processed" folder  
                 _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
-                var files = Directory.GetFiles(_innerDataDirectory);
+                var files = Directory.GetFiles(_paymentTransactionManager.InnerDataDirectory).Where(file => file.EndsWith(".txt") || file.EndsWith(".csv"));
 
-                if (files.Length > 0)
+                if (files.Count() > 0)
                 {
-                    for (int i = 0; i < files.Length; i++)
+                    List<string> movedFiles = new List<string>(files.Count());
+                    foreach (var file in files)
                     {
-                        var newFilePath = Path.Combine(InProgressDirectory, NewInProgressPrefix() + Path.GetFileName(files[i]));
-                        Directory.Move(files[i], newFilePath);
-                        files[i] = newFilePath;
+                        var newFilePath = Path.Combine(InProgressDirectory, NewInProgressPrefix() + Path.GetFileName(file));
+                        Directory.Move(file, newFilePath);
+                        movedFiles.Add(newFilePath);
                     }
 
-                    Task ParallelProcessing = ProcessFiles(files);
+                    var ParallelProcessing = ProcessFilesAsync(movedFiles);
                 }
 
                 await Task.Delay(1000, stoppingToken);
@@ -67,15 +60,15 @@ namespace RadencyDataProcessing.PaymentTransactions
             return Guid.NewGuid().ToString() + "_";
         }
 
-        private async Task ProcessFiles(string[] files)
+        private async Task ProcessFilesAsync(IEnumerable<string> files)
         {
-            for (int i = 0; i < files.Length; i++)
-            {
-                var ParallelProcessing = _paymentTransactionsReader.Read(files[i])
-                    .ContinueWith(result => _paymentTransactionsHandler.Handle(result.Result));
-            }
+            await Task.CompletedTask;
 
-            await Task.Delay(1000);
+            foreach (var file in files)
+            {
+                var ParallelProcessing = _paymentTransactionManager.Reader.ReadAsync(file)
+                    .ContinueWith(result => _paymentTransactionManager.Handler.Handle(result.Result));
+            }
         }
 
         private void CreateDirectoryIfNotExist(string directory)

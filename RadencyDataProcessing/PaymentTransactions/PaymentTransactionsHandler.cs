@@ -2,9 +2,9 @@
 
 namespace RadencyDataProcessing
 {
-    public class PaymentTransactionsHandler : IPaymentTransactionsHandler
+    public class PaymentTransactionsHandler : IPaymentTransactionHandler
     {
-        public async Task Handle(IPaymentTransactionReadResult readResult)
+        public async Task Handle(IPaymentTransactionParseResult readResult)
         {
             var n = 1;
             return;

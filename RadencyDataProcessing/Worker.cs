@@ -7,13 +7,13 @@ namespace RadencyDataProcessing
         private readonly ILogger<Worker> _logger;
         private readonly IHostApplicationLifetime _hostApplicationLifetime;
         private readonly IConfiguration _configuration;
-        private readonly IPaymentTransactionsProcessing _paymentTransactionsProcessing;
+        private readonly IPaymentTransactionProcessing _paymentTransactionsProcessing;
 
         public Worker(
             ILogger<Worker> logger,
             IHostApplicationLifetime hostApplicationLifetime,
             IConfiguration configuration,
-            IPaymentTransactionsProcessing paymentTransactionsProcessing)
+            IPaymentTransactionProcessing paymentTransactionsProcessing)
         {
             _logger = logger;
             _hostApplicationLifetime = hostApplicationLifetime;

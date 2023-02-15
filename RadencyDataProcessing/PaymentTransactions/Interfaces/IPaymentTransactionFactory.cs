@@ -4,10 +4,10 @@
     {
         public IPaymentTransactionEntry CreatePaymentTransactionEntry();
 
-        public IPaymentTransactionReadResult CreatePaymentTransactionReadResult();
+        public IPaymentTransactionParseResult CreatePaymentTransactionReadResult();
 
-        public IPaymentTransactionsReader CreatePaymentTransactionsReader();
+        public IPaymentTransactionReader CreatePaymentTransactionsReader();
 
-        public IPaymentTransactionsHandler CreatePaymentTransactionsHandler();
+        public IPaymentTransactionHandler CreatePaymentTransactionsHandler();
     }
 }
