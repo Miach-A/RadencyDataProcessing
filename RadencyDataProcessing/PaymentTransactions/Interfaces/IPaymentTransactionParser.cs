@@ -2,6 +2,6 @@
 {
     public interface IPaymentTransactionParser<T>
     {
-        IAsyncEnumerable<IPaymentTransactionParseResult> ParseAsync(IAsyncEnumerable<T> transaction);
+        Task<IPaymentTransactionParseResult> ParseAsync(T transaction);
     }
 }

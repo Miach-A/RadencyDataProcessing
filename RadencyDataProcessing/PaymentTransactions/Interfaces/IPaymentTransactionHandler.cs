@@ -2,6 +2,6 @@
 {
     public interface IPaymentTransactionHandler
     {
-        public Task HandleAsync(IAsyncEnumerable<IPaymentTransactionParseResult> paymentEntries);
+        public Task HandleAsync(IPaymentTransactionParseResult paymentEntries);
     }
 }

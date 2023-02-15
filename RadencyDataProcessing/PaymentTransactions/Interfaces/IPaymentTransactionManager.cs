@@ -6,6 +6,7 @@
         string OutgoingDataDirectory { get; }
         IPaymentTransactionReader<T> Reader { get; }
         IPaymentTransactionHandler Handler { get; }
+        IPaymentTransactionParser<T> Parser { get; }
         IPaymentTransactionEntry NewEntry();
 
     }

@@ -68,8 +68,19 @@ namespace RadencyDataProcessing.PaymentTransactions
             {
                 //var ParallelProcessing = _paymentTransactionManager.Reader.ReadAsync(file)
                 //    .ContinueWith(result => _paymentTransactionManager.Handler.Handle(result.Result));
-                var chunks = _paymentTransactionManager.Reader.ReadAsync(file);
+                var ParallelProcessing = Task.Run(() => ProcessFileAsync(file));
             }
+        }
+
+        private async Task ProcessFileAsync(string file)
+        {
+            var readChunks = _paymentTransactionManager.Reader.ReadAsync(file);
+            await foreach (var readChunk in readChunks)
+            {
+                var parsingChank = await _paymentTransactionManager.Parser.ParseAsync(readChunk);
+                await _paymentTransactionManager.Handler.HandleAsync(parsingChank);
+            }
+
         }
 
         private void CreateDirectoryIfNotExist(string directory)

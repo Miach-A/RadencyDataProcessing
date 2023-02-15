@@ -9,6 +9,7 @@ namespace RadencyDataProcessing.PaymentTransactions
         private readonly string _outgoingDataDirectory;
         private readonly IPaymentTransactionFactory<IEnumerable<string>> _paymentTransactionFactory;
         private readonly IPaymentTransactionReader<IEnumerable<string>> _paymentTransactionsReader;
+        private readonly IPaymentTransactionParser<IEnumerable<string>> _paymentTransactionsParser;
         private readonly IPaymentTransactionHandler _paymentTransactionsHandler;
 
         public PaymentTransactionManager(
@@ -20,6 +21,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             _paymentTransactionFactory = paymentTransactionFactory;
             _paymentTransactionsReader = _paymentTransactionFactory.CreatePaymentTransactionsReader();
             _paymentTransactionsHandler = _paymentTransactionFactory.CreatePaymentTransactionsHandler();
+            _paymentTransactionsParser = _paymentTransactionFactory.CreatePaymentTransactionParser();
         }
         public string InnerDataDirectory => _innerDataDirectory;
 
@@ -28,6 +30,8 @@ namespace RadencyDataProcessing.PaymentTransactions
         public IPaymentTransactionHandler Handler => _paymentTransactionsHandler;
 
         public IPaymentTransactionReader<IEnumerable<string>> Reader => _paymentTransactionsReader;
+
+        public IPaymentTransactionParser<IEnumerable<string>> Parser => _paymentTransactionsParser;
 
         public IPaymentTransactionEntry NewEntry()
         {
