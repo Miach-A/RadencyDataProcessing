@@ -9,5 +9,7 @@
         public IPaymentTransactionReader<T> CreatePaymentTransactionsReader();
 
         public IPaymentTransactionHandler CreatePaymentTransactionsHandler();
+
+        public IPaymentTransactionParser<T> CreatePaymentTransactionParser();
     }
 }
