@@ -3,7 +3,7 @@ using RadencyDataProcessing.PaymentTransactions.Models;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionFactory : IPaymentTransactionFactory
+    public class PaymentTransactionFactory : IPaymentTransactionFactory<IEnumerable<string>>
     {
         public IPaymentTransactionEntry CreatePaymentTransactionEntry()
         {
@@ -22,7 +22,7 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         public IPaymentTransactionReader<IEnumerable<string>> CreatePaymentTransactionsReader()
         {
-            return new PaymentTransactionsReader<IEnumerable<string>(this);
+            return new PaymentTransactionsReader();
         }
     }
 }

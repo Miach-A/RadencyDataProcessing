@@ -3,17 +3,17 @@ using RadencyDataProcessing.PaymentTransactions.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionManager : IPaymentTransactionManager
+    public class PaymentTransactionManager : IPaymentTransactionManager<IEnumerable<string>>
     {
         private readonly string _innerDataDirectory;
         private readonly string _outgoingDataDirectory;
-        private readonly IPaymentTransactionFactory _paymentTransactionFactory;
+        private readonly IPaymentTransactionFactory<IEnumerable<string>> _paymentTransactionFactory;
         private readonly IPaymentTransactionReader<IEnumerable<string>> _paymentTransactionsReader;
         private readonly IPaymentTransactionHandler _paymentTransactionsHandler;
 
         public PaymentTransactionManager(
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionFactory paymentTransactionFactory)
+            IPaymentTransactionFactory<IEnumerable<string>> paymentTransactionFactory)
         {
             _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
@@ -25,9 +25,9 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         public string OutgoingDataDirectory => _outgoingDataDirectory;
 
-        public IPaymentTransactionReader Reader => _paymentTransactionsReader;
-
         public IPaymentTransactionHandler Handler => _paymentTransactionsHandler;
+
+        public IPaymentTransactionReader<IEnumerable<string>> Reader => _paymentTransactionsReader;
 
         public IPaymentTransactionEntry NewEntry()
         {

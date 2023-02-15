@@ -6,12 +6,12 @@ namespace RadencyDataProcessing.PaymentTransactions
     public class PaymentTransactionsProcessing : IPaymentTransactionProcessing
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IPaymentTransactionManager _paymentTransactionManager;
+        private readonly IPaymentTransactionManager<IEnumerable<string>> _paymentTransactionManager;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionManager paymentTransactionManager
+            IPaymentTransactionManager<IEnumerable<string>> paymentTransactionManager
             )
         {
             _logger = logger;
@@ -66,8 +66,9 @@ namespace RadencyDataProcessing.PaymentTransactions
 
             foreach (var file in files)
             {
-                var ParallelProcessing = _paymentTransactionManager.Reader.ReadAsync(file)
-                    .ContinueWith(result => _paymentTransactionManager.Handler.Handle(result.Result));
+                //var ParallelProcessing = _paymentTransactionManager.Reader.ReadAsync(file)
+                //    .ContinueWith(result => _paymentTransactionManager.Handler.Handle(result.Result));
+                var chunks = _paymentTransactionManager.Reader.ReadAsync(file);
             }
         }
 

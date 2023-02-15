@@ -24,8 +24,8 @@ try
                 }
             });
 
-            services.AddSingleton(typeof(IPaymentTransactionFactory), typeof(PaymentTransactionFactory));
-            services.AddSingleton(typeof(IPaymentTransactionManager), typeof(PaymentTransactionManager));
+            services.AddSingleton(typeof(IPaymentTransactionFactory<IEnumerable<string>>), typeof(PaymentTransactionFactory));
+            services.AddSingleton(typeof(IPaymentTransactionManager<IEnumerable<string>>), typeof(PaymentTransactionManager));
             services.AddSingleton(typeof(IPaymentTransactionProcessing), typeof(PaymentTransactionsProcessing));
             services.AddHostedService<Worker>();
         })

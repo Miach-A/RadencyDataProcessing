@@ -6,55 +6,81 @@ namespace RadencyDataProcessing
     {
         //private readonly NumberFormatInfo _numberFormatInfo;
         //private readonly DateTimeFormatInfo _dateTimeFormatInfo;
-        private readonly IPaymentTransactionFactory _paymentTransactionFactory;
+        //private readonly IPaymentTransactionFactory _paymentTransactionFactory;
         public PaymentTransactionsReader(
-            IPaymentTransactionFactory transactionFactory)
+//            IPaymentTransactionFactory transactionFactory
+)
         {
-            _paymentTransactionFactory = transactionFactory;
+            //            _paymentTransactionFactory = transactionFactory;
         }
         public async IAsyncEnumerable<IEnumerable<string>> ReadAsync(string path)
         {
             //return await Task.Run(() => Read(path));
-
-        }
-
-        private IPaymentTransactionParseResult Read(string path)
-        {
-            var result = _paymentTransactionFactory.CreatePaymentTransactionReadResult();
-            result.ReadFilePath = path;
-
-            ReadTxt(path, result);
-
-            return result;
-        }
-
-        private void ReadTxt(string path, IPaymentTransactionParseResult result)
-        {
-            List<IPaymentTransactionEntry> resList = new();
-            List<string> ErrorList = new();
-
+            int chunkSize = 1000;
+            int countInChunk = 0;
             StreamReader reader = new(path);
             string? data;
+            List<string> chunk = new List<string>(chunkSize);
 
-            data = reader.ReadLine();
-            while (data != null)
+            while (true)
             {
-                var valuesArray = SplitIgnoreQuotes(data, ",").ToArray();
-                var entry = _paymentTransactionFactory.CreatePaymentTransactionEntry();
-                if (entry.SetData<string[]>(valuesArray))
+                data = await reader.ReadLineAsync();
+                if (data == null) break;
+                countInChunk++;
+                chunk.Add(data);
+
+                if (countInChunk == chunkSize)
                 {
-                    resList.Add(entry);
+                    countInChunk = 0;
+                    chunk.Clear();
+                    yield return chunk;
                 }
-                else
-                {
-                    ErrorList.Add(data);
-                }
-                data = reader.ReadLine();
             }
 
-            result.Entries = resList;
-            result.ErrorLines = ErrorList;
+            if (chunk.Count > 0)
+            {
+                yield return chunk;
+            }
+
         }
+
+        //private IPaymentTransactionParseResult Read(string path)
+        //{
+        //    var result = _paymentTransactionFactory.CreatePaymentTransactionReadResult();
+        //    result.ReadFilePath = path;
+
+        //    ReadTxt(path, result);
+
+        //    return result;
+        //}
+
+        //private void ReadTxt(string path, IPaymentTransactionParseResult result)
+        //{
+        //    List<IPaymentTransactionEntry> resList = new();
+        //    List<string> ErrorList = new();
+
+        //    StreamReader reader = new(path);
+        //    string? data;
+
+        //    data = reader.ReadLine();
+        //    while (data != null)
+        //    {
+        //        var valuesArray = SplitIgnoreQuotes(data, ",").ToArray();
+        //        var entry = _paymentTransactionFactory.CreatePaymentTransactionEntry();
+        //        if (entry.SetData<string[]>(valuesArray))
+        //        {
+        //            resList.Add(entry);
+        //        }
+        //        else
+        //        {
+        //            ErrorList.Add(data);
+        //        }
+        //        data = reader.ReadLine();
+        //    }
+
+        //    result.Entries = resList;
+        //    result.ErrorLines = ErrorList;
+        //}
 
         private List<string> SplitIgnoreQuotes(string input, string separator)
         {
