@@ -1,30 +1,34 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Interfaces;
+﻿using RadencyDataProcessing.PaymentTransactions.Models;
 using System.Globalization;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionParser : IPaymentTransactionParser<IEnumerable<string>>
+    public class PaymentTransactionParser : PaymentTransactionParserBase<IEnumerable<string>, PaymentTransactionParseResult>
     {
         private readonly NumberFormatInfo _numberFormatInfo;
         private readonly DateTimeFormatInfo _dateTimeFormatInfo;
-        private readonly IPaymentTransactionFactory<IEnumerable<string>> _paymentTransactionFactory;
+        private readonly PaymentTransactionFactory _paymentTransactionFactory;
         public PaymentTransactionParser(
-            IPaymentTransactionFactory<IEnumerable<string>> transactionFactory)
+            PaymentTransactionFactory transactionFactory)
         {
             _paymentTransactionFactory = transactionFactory;
             _numberFormatInfo = new NumberFormatInfo();
             _numberFormatInfo.NumberDecimalSeparator = ".";
             _dateTimeFormatInfo = new DateTimeFormatInfo();
         }
-        public async Task<IPaymentTransactionParseResult> ParseAsync(IEnumerable<string> transaction)
+        public override async Task<PaymentTransactionParseResult> ParseAsync(IEnumerable<string> transaction)
         {
             return await Task.Run(() => Parse(transaction));
         }
+        public override PaymentTransactionParseResult test()
+        {
+            throw new NotImplementedException();
+        }
 
-        public IPaymentTransactionParseResult Parse(IEnumerable<string> transaction)
+        public PaymentTransactionParseResult Parse(IEnumerable<string> transaction)
         {
             var result = _paymentTransactionFactory.CreatePaymentTransactionReadResult();
-            List<IPaymentTransactionEntry> entries = new List<IPaymentTransactionEntry>();
+            List<PaymentTransactionEntry> entries = new List<PaymentTransactionEntry>();
             List<string> errors = new List<string>();
 
             foreach (var data in transaction)
@@ -46,7 +50,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             return result;
         }
 
-        private IPaymentTransactionEntry? Handle(string[] strings)
+        private PaymentTransactionEntry? Handle(string[] strings)
         {
             if (strings.Count() != 7) return null;
             foreach (string s in strings)
@@ -59,13 +63,15 @@ namespace RadencyDataProcessing.PaymentTransactions
             if (long.TryParse(strings[5], out long accountNumber) == false) return null;
 
             var entry = _paymentTransactionFactory.CreatePaymentTransactionEntry();
-            object[] propherty = new object[] { strings[0], strings[1], strings[2], payment, date, accountNumber, strings[6] };
-            if (entry.SetData<object[]>(propherty))
-            {
-                return entry;
-            }
+            entry.FirstName = strings[0];
+            entry.LastName = strings[1];
+            entry.Address = strings[2];
+            entry.Payment = payment;
+            entry.Date = date;
+            entry.AccountNumber = accountNumber;
+            entry.Service = strings[6];
 
-            return null;
+            return entry;
         }
 
         private List<string> SplitIgnoreQuotes(string input, string separator)

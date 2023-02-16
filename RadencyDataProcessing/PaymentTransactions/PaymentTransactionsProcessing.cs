@@ -3,22 +3,22 @@ using RadencyDataProcessing.PaymentTransactions.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionsProcessing : IPaymentTransactionProcessing
+    public class PaymentTransactionsProcessing : IProcessing
     {
         private readonly ILogger<Worker> _logger;
-        private readonly IPaymentTransactionManager<IEnumerable<string>> _paymentTransactionManager;
+        private readonly PaymentTransactionManager _paymentTransactionManager;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionManager<IEnumerable<string>> paymentTransactionManager
+            PaymentTransactionManager paymentTransactionManager
             )
         {
             _logger = logger;
             _paymentTransactionManager = paymentTransactionManager;
         }
 
-        public async Task TransactionProcessing(CancellationToken stoppingToken)
+        public async Task Processing(CancellationToken stoppingToken)
         {
             var InProgressDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "InProgress");
             CreateDirectoryIfNotExist(InProgressDirectory);

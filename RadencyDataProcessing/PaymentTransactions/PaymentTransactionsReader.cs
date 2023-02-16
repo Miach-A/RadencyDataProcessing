@@ -1,13 +1,10 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Interfaces;
+﻿using RadencyDataProcessing.PaymentTransactions.Base;
 
 namespace RadencyDataProcessing
 {
-    public class PaymentTransactionsReader : IPaymentTransactionReader<IEnumerable<string>>
+    public class PaymentTransactionsReader : PaymentTransactionsReaderBase<string, IAsyncEnumerable<IEnumerable<string>>>
     {
-        public PaymentTransactionsReader()
-        {
-        }
-        public async IAsyncEnumerable<IEnumerable<string>> ReadAsync(string path)
+        public override async IAsyncEnumerable<IEnumerable<string>> ReadAsync(string path)
         {
             int chunkSize = 1000;
             int countInChunk = 0;

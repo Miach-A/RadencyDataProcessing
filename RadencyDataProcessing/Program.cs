@@ -24,13 +24,12 @@ try
                 }
             });
 
-            services.AddSingleton(typeof(IPaymentTransactionReader<IEnumerable<string>>), typeof(PaymentTransactionsReader));
-            services.AddSingleton(typeof(IPaymentTransactionParser<IEnumerable<string>>), typeof(PaymentTransactionParser));
-            services.AddSingleton(typeof(IPaymentTransactionHandler), typeof(PaymentTransactionsHandler));
-
-            services.AddSingleton(typeof(IPaymentTransactionFactory<IEnumerable<string>>), typeof(PaymentTransactionFactory));
-            services.AddSingleton(typeof(IPaymentTransactionManager<IEnumerable<string>>), typeof(PaymentTransactionManager));
-            services.AddSingleton(typeof(IPaymentTransactionProcessing), typeof(PaymentTransactionsProcessing));
+            services.AddSingleton<PaymentTransactionsReader>();
+            services.AddSingleton<PaymentTransactionParser>();
+            services.AddSingleton<PaymentTransactionsHandler>();
+            services.AddSingleton<PaymentTransactionFactory>();
+            services.AddSingleton<PaymentTransactionManager>();
+            services.AddSingleton(typeof(IProcessing), typeof(PaymentTransactionsProcessing));
             services.AddHostedService<Worker>();
         })
         .Build();

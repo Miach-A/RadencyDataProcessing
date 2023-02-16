@@ -1,13 +1,18 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Interfaces;
+﻿using RadencyDataProcessing.PaymentTransactions.Base;
+using RadencyDataProcessing.PaymentTransactions.Models;
 
 namespace RadencyDataProcessing
 {
-    public class PaymentTransactionsHandler : IPaymentTransactionHandler
+    public class PaymentTransactionsHandler : PaymentTransactionsHandlerBase<PaymentTransactionParseResult>
     {
-        public async Task HandleAsync(IPaymentTransactionParseResult parseResult)
+        public override async Task<bool> HandleAsync(PaymentTransactionParseResult parseResult)
         {
-            var n = 1;
-            return;
+            return await Task.Run(() => Handle());
+        }
+
+        public bool Handle()
+        {
+            return true;
         }
     }
 }

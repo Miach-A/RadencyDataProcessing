@@ -1,33 +1,18 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Interfaces;
+﻿using RadencyDataProcessing.PaymentTransactions.Base;
 using RadencyDataProcessing.PaymentTransactions.Models;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionFactory : IPaymentTransactionFactory<IEnumerable<string>>
+    public class PaymentTransactionFactory : PaymentTransactionFactoryBase
     {
-        public IPaymentTransactionEntry CreatePaymentTransactionEntry()
+        public override PaymentTransactionEntry CreatePaymentTransactionEntry()
         {
             return new PaymentTransactionEntry();
         }
 
-        public IPaymentTransactionParseResult CreatePaymentTransactionReadResult()
+        public override PaymentTransactionParseResult CreatePaymentTransactionReadResult()
         {
             return new PaymentTransactionParseResult();
         }
-
-        //public IPaymentTransactionParser<IEnumerable<string>> CreatePaymentTransactionParser()
-        //{
-        //    return new PaymentTransactionParser(this);
-        //}
-
-        //public IPaymentTransactionHandler CreatePaymentTransactionsHandler()
-        //{
-        //    return new PaymentTransactionsHandler();
-        //}
-
-        //public IPaymentTransactionReader<IEnumerable<string>> CreatePaymentTransactionsReader()
-        //{
-        //    return new PaymentTransactionsReader();
-        //}
     }
 }

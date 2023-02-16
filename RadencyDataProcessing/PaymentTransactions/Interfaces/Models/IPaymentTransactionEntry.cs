@@ -1,7 +1,6 @@
 ﻿namespace RadencyDataProcessing.PaymentTransactions.Interfaces
 {
-    public interface IPaymentTransactionEntry
+    public interface IPaymentTransactionEntry : IPaymentTransactionEntryBase
     {
-        public bool SetData<T>(T data);
     }
 }

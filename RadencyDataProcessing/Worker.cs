@@ -7,13 +7,13 @@ namespace RadencyDataProcessing
         private readonly ILogger<Worker> _logger;
         private readonly IHostApplicationLifetime _hostApplicationLifetime;
         private readonly IConfiguration _configuration;
-        private readonly IPaymentTransactionProcessing _paymentTransactionsProcessing;
+        private readonly IProcessing _paymentTransactionsProcessing;
 
         public Worker(
             ILogger<Worker> logger,
             IHostApplicationLifetime hostApplicationLifetime,
             IConfiguration configuration,
-            IPaymentTransactionProcessing paymentTransactionsProcessing)
+            IProcessing paymentTransactionsProcessing)
         {
             _logger = logger;
             _hostApplicationLifetime = hostApplicationLifetime;
@@ -26,7 +26,7 @@ namespace RadencyDataProcessing
             try
             {
                 await Task.WhenAll(
-                    _paymentTransactionsProcessing.TransactionProcessing(stoppingToken)
+                    _paymentTransactionsProcessing.Processing(stoppingToken)
                     );
             }
             catch (Exception ex)

@@ -1,15 +1,13 @@
-﻿namespace RadencyDataProcessing.PaymentTransactions.Interfaces
+﻿using RadencyDataProcessing.PaymentTransactions.Base;
+
+namespace RadencyDataProcessing.PaymentTransactions.Interfaces
 {
-    public interface IPaymentTransactionFactory<T>
+    public interface IPaymentTransactionFactory<TEntry, TParseResult>
+        where TEntry : PaymentTransactionEntryBase, new()
+        where TParseResult : PaymentTransactionParseResultBase, new()
     {
-        public IPaymentTransactionEntry CreatePaymentTransactionEntry();
+        public TEntry CreatePaymentTransactionEntry();
 
-        public IPaymentTransactionParseResult CreatePaymentTransactionReadResult();
-
-        //public IPaymentTransactionReader<T> CreatePaymentTransactionsReader();
-
-        //public IPaymentTransactionHandler CreatePaymentTransactionsHandler();
-
-        //public IPaymentTransactionParser<T> CreatePaymentTransactionParser();
+        public TParseResult CreatePaymentTransactionReadResult();
     }
 }

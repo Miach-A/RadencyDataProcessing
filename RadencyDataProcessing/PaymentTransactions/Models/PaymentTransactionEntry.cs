@@ -1,8 +1,8 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Interfaces;
+﻿using RadencyDataProcessing.PaymentTransactions.Base;
 
 namespace RadencyDataProcessing.PaymentTransactions.Models
 {
-    public class PaymentTransactionEntry : IPaymentTransactionEntry
+    public class PaymentTransactionEntry : PaymentTransactionEntryBase
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;

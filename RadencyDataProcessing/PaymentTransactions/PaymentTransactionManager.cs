@@ -1,23 +1,22 @@
 ﻿using Microsoft.Extensions.Options;
-using RadencyDataProcessing.PaymentTransactions.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
-    public class PaymentTransactionManager : IPaymentTransactionManager<IEnumerable<string>>
+    public class PaymentTransactionManager
     {
         private readonly string _innerDataDirectory;
         private readonly string _outgoingDataDirectory;
-        private readonly IPaymentTransactionFactory<IEnumerable<string>> _paymentTransactionFactory;
-        private readonly IPaymentTransactionReader<IEnumerable<string>> _paymentTransactionsReader;
-        private readonly IPaymentTransactionParser<IEnumerable<string>> _paymentTransactionsParser;
-        private readonly IPaymentTransactionHandler _paymentTransactionsHandler;
+        private readonly PaymentTransactionFactory _paymentTransactionFactory;
+        private readonly PaymentTransactionsReader _paymentTransactionsReader;
+        private readonly PaymentTransactionParser _paymentTransactionsParser;
+        private readonly PaymentTransactionsHandler _paymentTransactionsHandler;
 
         public PaymentTransactionManager(
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            IPaymentTransactionFactory<IEnumerable<string>> paymentTransactionFactory,
-            IPaymentTransactionReader<IEnumerable<string>> paymentTransactionReader,
-             IPaymentTransactionParser<IEnumerable<string>> paymentTransactionParser,
-              IPaymentTransactionHandler paymentTransactionHandler)
+            PaymentTransactionFactory paymentTransactionFactory,
+            PaymentTransactionsReader paymentTransactionReader,
+            PaymentTransactionParser paymentTransactionParser,
+            PaymentTransactionsHandler paymentTransactionHandler)
         {
             _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
@@ -30,12 +29,10 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         public string OutgoingDataDirectory => _outgoingDataDirectory;
 
-        public IPaymentTransactionHandler Handler => _paymentTransactionsHandler;
+        public PaymentTransactionsHandler Handler => _paymentTransactionsHandler;
 
-        public IPaymentTransactionReader<IEnumerable<string>> Reader => _paymentTransactionsReader;
+        public PaymentTransactionsReader Reader => _paymentTransactionsReader;
 
-        public IPaymentTransactionParser<IEnumerable<string>> Parser => _paymentTransactionsParser;
-
-        public IPaymentTransactionFactory<IEnumerable<string>> Factory => _paymentTransactionFactory;
+        public PaymentTransactionParser Parser => _paymentTransactionsParser;
     }
 }
