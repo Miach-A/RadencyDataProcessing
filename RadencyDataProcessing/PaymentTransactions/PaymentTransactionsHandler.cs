@@ -50,12 +50,34 @@ namespace RadencyDataProcessing
                     });
 
             var currentDate = DateTime.Now.ToString("MM-dd-yyyy");
-            var fileOutputfile = _fileHandling.NextAvailableFilename(Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, currentDate.ToString(), "output.json"));
-            Console.WriteLine(fileOutputfile);
-            File.WriteAllText(fileOutputfile, JsonConvert.SerializeObject(res, Formatting.Indented));
+            var outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, currentDate.ToString());
+            var outputTempDirectoryPath = Path.Combine(outputDirectoryPath, "temp");
+            var inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
 
-            //Console.WriteLine(JsonConvert.SerializeObject(res, Formatting.Indented));
-            var b = 2;
+            var inputFileNewPath = Path.Combine(inputProcessedDirectoryPath, Path.GetFileName(Source));
+
+            //File.Move(Source, inputFileNewPath);
+
+            _fileHandling.CreateDirectoryIfNotExist(outputDirectoryPath);
+            _fileHandling.CreateDirectoryIfNotExist(outputTempDirectoryPath);
+
+            var outputFile = Path.Combine(outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
+            var outputTempFile = Path.Combine(outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.txt"));
+
+
+            File.WriteAllText(outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
+
+            var tempData = new List<string>();
+            tempData.Add(ParseResult.Entries.Count().ToString());
+            tempData.Add(ParseResult.ErrorLines.Count().ToString());
+            tempData.Add(inputFileNewPath);
+
+            StreamWriter writer = new StreamWriter(outputTempFile);
+            foreach (var row in tempData)
+            {
+                writer.WriteLine(row);
+            }
+            writer.Close();
         }
     }
 }

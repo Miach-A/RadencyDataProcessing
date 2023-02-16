@@ -45,5 +45,13 @@
 
             return string.Format(pattern, max);
         }
+
+        public void CreateDirectoryIfNotExist(string directory)
+        {
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
     }
 }

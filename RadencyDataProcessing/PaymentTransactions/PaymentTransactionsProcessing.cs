@@ -24,7 +24,7 @@ namespace RadencyDataProcessing.PaymentTransactions
         public async Task Processing(CancellationToken stoppingToken)
         {
             var InProgressDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "InProgress");
-            CreateDirectoryIfNotExist(InProgressDirectory);
+            _fileHandling.CreateDirectoryIfNotExist(InProgressDirectory);
 
             var filesNotProcessedLastTime = Directory.GetFiles(InProgressDirectory);
             foreach (var file in filesNotProcessedLastTime)
@@ -36,7 +36,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             }
 
             var ProcessedDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "Processed");
-            CreateDirectoryIfNotExist(ProcessedDirectory);
+            _fileHandling.CreateDirectoryIfNotExist(ProcessedDirectory);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -90,12 +90,6 @@ namespace RadencyDataProcessing.PaymentTransactions
             await hanler.SaveAsync();
         }
 
-        private void CreateDirectoryIfNotExist(string directory)
-        {
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-        }
+
     }
 }
