@@ -1,4 +1,4 @@
-﻿namespace RadencyDataProcessing.PaymentTransactions.Interfaces
+﻿namespace RadencyDataProcessing.Interfaces
 {
     public interface IProcessing
     {

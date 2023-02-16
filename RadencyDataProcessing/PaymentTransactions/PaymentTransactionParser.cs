@@ -8,8 +8,7 @@ namespace RadencyDataProcessing.PaymentTransactions
         private readonly NumberFormatInfo _numberFormatInfo;
         private readonly DateTimeFormatInfo _dateTimeFormatInfo;
         private readonly PaymentTransactionFactory _paymentTransactionFactory;
-        public PaymentTransactionParser(
-            PaymentTransactionFactory transactionFactory)
+        public PaymentTransactionParser(PaymentTransactionFactory transactionFactory)
         {
             _paymentTransactionFactory = transactionFactory;
             _numberFormatInfo = new NumberFormatInfo();
@@ -19,10 +18,6 @@ namespace RadencyDataProcessing.PaymentTransactions
         public override async Task<PaymentTransactionParseResult> ParseAsync(IEnumerable<string> transaction)
         {
             return await Task.Run(() => Parse(transaction));
-        }
-        public override PaymentTransactionParseResult test()
-        {
-            throw new NotImplementedException();
         }
 
         public PaymentTransactionParseResult Parse(IEnumerable<string> transaction)

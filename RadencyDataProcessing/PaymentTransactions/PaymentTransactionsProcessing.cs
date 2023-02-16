@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
-using RadencyDataProcessing.PaymentTransactions.Interfaces;
+using RadencyDataProcessing.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {

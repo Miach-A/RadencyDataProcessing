@@ -1,7 +1,7 @@
 using RadencyDataProcessing;
 using RadencyDataProcessing.Extensions;
+using RadencyDataProcessing.Interfaces;
 using RadencyDataProcessing.PaymentTransactions;
-using RadencyDataProcessing.PaymentTransactions.Interfaces;
 
 try
 {

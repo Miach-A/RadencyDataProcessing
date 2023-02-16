@@ -1,4 +1,4 @@
-using RadencyDataProcessing.PaymentTransactions.Interfaces;
+using RadencyDataProcessing.Interfaces;
 
 namespace RadencyDataProcessing
 {
