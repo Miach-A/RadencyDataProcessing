@@ -19,24 +19,24 @@ namespace RadencyDataProcessing
         private void Save()
         {
             var res = ParseResult.Entries
-                .GroupBy(x => new { x.Service, x.City })
-                .GroupBy(x => x.Key.City)
-                    .Select(x => new
+                .GroupBy(entry => new { entry.Service, entry.City })
+                .GroupBy(group => group.Key.City)
+                    .Select(groupCity => new
                     {
-                        city = x.Key,
-                        services = x.Select(y => new
+                        city = groupCity.Key,
+                        services = groupCity.Select(groupService => new
                         {
-                            name = y.Key.Service,
-                            payers = y.Select(z => new
+                            name = groupService.Key.Service,
+                            payers = groupService.Select(entry => new
                             {
-                                name = z.FirstName + z.LastName,
-                                payment = z.Payment,
-                                date = z.Date,
-                                account_number = z.AccountNumber
+                                name = string.Concat(entry.FirstName, " ", entry.LastName),
+                                payment = entry.Payment,
+                                date = entry.Date,
+                                account_number = entry.AccountNumber
                             }),
-                            total = y.Sum(z => z.Payment)
+                            total = groupService.Sum(entry => entry.Payment)
                         }),
-                        total = x.Sum(y => y.Sum(z => z.Payment))
+                        total = groupCity.Sum(groupService => groupService.Sum(entry => entry.Payment))
                     });
 
             Console.WriteLine(JsonConvert.SerializeObject(res, Formatting.Indented));

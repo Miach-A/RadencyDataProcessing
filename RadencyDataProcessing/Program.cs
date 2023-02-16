@@ -1,4 +1,5 @@
 using RadencyDataProcessing;
+using RadencyDataProcessing.Common;
 using RadencyDataProcessing.Extensions;
 using RadencyDataProcessing.Interfaces;
 using RadencyDataProcessing.PaymentTransactions;
@@ -24,6 +25,7 @@ try
                 }
             });
 
+            services.AddSingleton<FileHandling>();
             services.AddSingleton<PaymentTransactionsReader>();
             services.AddSingleton<PaymentTransactionParser>();
             services.AddSingleton<PaymentTransactionFactory>();

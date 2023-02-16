@@ -1,4 +1,5 @@
-﻿using RadencyDataProcessing.Interfaces;
+﻿using RadencyDataProcessing.Common;
+using RadencyDataProcessing.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
@@ -6,15 +7,18 @@ namespace RadencyDataProcessing.PaymentTransactions
     {
         private readonly ILogger<Worker> _logger;
         private readonly PaymentTransactionManager _paymentTransactionManager;
+        private readonly FileHandling _fileHandling;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
-            //IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            PaymentTransactionManager paymentTransactionManager
+            PaymentTransactionManager paymentTransactionManager,
+            FileHandling fileHandling
             )
         {
             _logger = logger;
             _paymentTransactionManager = paymentTransactionManager;
+            _fileHandling = fileHandling;
+
         }
 
         public async Task Processing(CancellationToken stoppingToken)
@@ -25,7 +29,10 @@ namespace RadencyDataProcessing.PaymentTransactions
             var filesNotProcessedLastTime = Directory.GetFiles(InProgressDirectory);
             foreach (var file in filesNotProcessedLastTime)
             {
-                Directory.Move(file, Path.Combine(_paymentTransactionManager.InnerDataDirectory, Path.GetFileName(file).Substring(NewInProgressPrefix().Length))); // or magic numbers antipattern 37 = Guid.NewGuid() + "_"
+                var filename = _fileHandling.NextAvailableFilename(
+                    Path.Combine(_paymentTransactionManager.InnerDataDirectory,
+                                    Path.GetFileName(file).Substring(NewInProgressPrefix().Length))); // or magic numbers antipattern 37 = Guid.NewGuid() + "_"
+                Directory.Move(file, filename);
             }
 
             var ProcessedDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "Processed");

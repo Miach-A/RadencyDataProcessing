@@ -38,5 +38,14 @@ namespace RadencyDataProcessing
                 _hostApplicationLifetime.StopApplication();
             }
         }
+
+        private int SecondsTillMidnight()
+        {
+            var now = DateTime.Now;
+            var hours = 23 - now.Hour;
+            var minutes = 59 - now.Minute;
+            var seconds = 59 - now.Second;
+            return hours * 3600 + minutes * 60 + seconds;
+        }
     }
 }
