@@ -38,6 +38,9 @@ namespace RadencyDataProcessing.PaymentTransactions
             var ProcessedDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "Processed");
             _fileHandling.CreateDirectoryIfNotExist(ProcessedDirectory);
 
+            var midnightWorker = Task.Run(() => MidnightWorker(stoppingToken))
+                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
@@ -55,7 +58,7 @@ namespace RadencyDataProcessing.PaymentTransactions
                         movedFiles.Add(newFilePath);
                     }
 
-                    var ParallelProcessing = ProcessFilesAsync(movedFiles);
+                    var filesWorker = ProcessFilesAsync(movedFiles);
                 }
 
                 await Task.Delay(1000, stoppingToken);
@@ -73,7 +76,7 @@ namespace RadencyDataProcessing.PaymentTransactions
 
             foreach (var file in files)
             {
-                var ParallelProcessing = Task.Run(() => ProcessFileAsync(file))
+                var fileWorker = Task.Run(() => ProcessFileAsync(file))
                     .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
@@ -91,5 +94,29 @@ namespace RadencyDataProcessing.PaymentTransactions
             await hanler.SaveAsync();
         }
 
+        private void MidnightWorker(CancellationToken stoppingToken)
+        {
+            Task.Delay(TimeSpan.FromSeconds(SecondsTillMidnight()));
+
+            var handler = _paymentTransactionManager.Factory.CreatePaymentTransactionsMidnightHandler();
+            Task.Run(() => handler.MidnightWork())
+                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                Task.Delay(TimeSpan.FromHours(24));
+                Task.Run(() => handler.MidnightWork())
+                    .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+            }
+        }
+
+        private int SecondsTillMidnight()
+        {
+            var now = DateTime.Now;
+            var hours = 23 - now.Hour;
+            var minutes = 59 - now.Minute;
+            var seconds = 59 - now.Second;
+            return hours * 3600 + minutes * 60 + seconds;
+        }
     }
 }

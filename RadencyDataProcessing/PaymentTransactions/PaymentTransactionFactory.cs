@@ -26,5 +26,11 @@ namespace RadencyDataProcessing.PaymentTransactions
             handler.Source = source;
             return handler;
         }
+
+        public PaymentTransactionsHandler CreatePaymentTransactionsMidnightHandler()
+        {
+            PaymentTransactionsHandler handler = (PaymentTransactionsHandler)_serviceProvider.GetService(typeof(PaymentTransactionsHandler))!;
+            return handler;
+        }
     }
 }

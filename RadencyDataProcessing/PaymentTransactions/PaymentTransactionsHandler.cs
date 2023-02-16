@@ -11,6 +11,14 @@ namespace RadencyDataProcessing
     {
         private readonly PaymentTransactionsConfiguration _paymentTransactionsConfiguration;
         private readonly FileHandling _fileHandling;
+        private string _currentDate;
+        private string _outputDirectoryPath;
+        private string _outputTempDirectoryPath;
+        private string _inputProcessedDirectoryPath;
+        private string _inputProcessedFilePath;
+        private string _outputFile;
+        private string _outputTempFile;
+
         public PaymentTransactionsHandler(
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
             FileHandling fileHandling)
@@ -50,27 +58,17 @@ namespace RadencyDataProcessing
                         total = groupCity.Sum(groupService => groupService.Sum(entry => entry.Payment))
                     });
 
-            var currentDate = DateTime.Now.ToString("MM-dd-yyyy");
-            var outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, currentDate.ToString());
-            var outputTempDirectoryPath = Path.Combine(outputDirectoryPath, "temp");
-            var inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
 
-            var inputProcessedFilePath = Path.Combine(inputProcessedDirectoryPath, Path.GetFileName(Source));
+            SetPaths();
 
-            _fileHandling.CreateDirectoryIfNotExist(outputDirectoryPath);
-            _fileHandling.CreateDirectoryIfNotExist(outputTempDirectoryPath);
-
-            var outputFile = Path.Combine(outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
-            var outputTempFile = Path.Combine(outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.txt"));
-
-            File.WriteAllText(outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
+            File.WriteAllText(_outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
 
             var tempData = new List<string>();
             tempData.Add(ParseResult.Entries.Count().ToString());
             tempData.Add(ParseResult.ErrorLines.Count().ToString());
-            tempData.Add(inputProcessedFilePath);
+            tempData.Add(_inputProcessedFilePath);
 
-            StreamWriter writer = new StreamWriter(outputTempFile);
+            StreamWriter writer = new StreamWriter(_outputTempFile);
             foreach (var row in tempData)
             {
                 writer.WriteLine(row);
@@ -78,7 +76,30 @@ namespace RadencyDataProcessing
             writer.Close();
 
             // --------------  temporarily ---------------------
-            File.Move(Source, inputProcessedFilePath);
+            File.Move(Source, _inputProcessedFilePath);
+        }
+
+        private void SetPaths()
+        {
+            _currentDate = DateTime.Now.ToString("MM-dd-yyyy");
+            _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, _currentDate.ToString());
+            _outputTempDirectoryPath = Path.Combine(_outputDirectoryPath, "temp");
+            _inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
+
+            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source));
+
+            _fileHandling.CreateDirectoryIfNotExist(_outputDirectoryPath);
+            _fileHandling.CreateDirectoryIfNotExist(_outputTempDirectoryPath);
+
+            _outputFile = Path.Combine(_outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
+            _outputTempFile = Path.Combine(_outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.txt"));
+        }
+
+        public void MidnightWork()
+        {
+            //await Task.CompletedTask;
+
+            //work
         }
     }
 }
