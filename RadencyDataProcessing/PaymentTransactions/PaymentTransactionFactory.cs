@@ -14,5 +14,10 @@ namespace RadencyDataProcessing.PaymentTransactions
         {
             return new PaymentTransactionParseResult();
         }
+
+        public override PaymentTransactionsHandler CreatePaymentTransactionsHandler(string source)
+        {
+            return new PaymentTransactionsHandler(source);
+        }
     }
 }

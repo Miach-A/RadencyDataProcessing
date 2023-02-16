@@ -1,18 +1,26 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Base;
+﻿using Newtonsoft.Json;
+using RadencyDataProcessing.PaymentTransactions.Base;
 using RadencyDataProcessing.PaymentTransactions.Models;
 
 namespace RadencyDataProcessing
 {
-    public class PaymentTransactionsHandler : PaymentTransactionsHandlerBase<PaymentTransactionParseResult>
+    public class PaymentTransactionsHandler : PaymentTransactionsHandlerBase
     {
-        public override async Task<bool> HandleAsync(PaymentTransactionParseResult parseResult)
+        public PaymentTransactionsHandler(string source) : base(source)
         {
-            return await Task.Run(() => Handle());
         }
 
-        public bool Handle()
+        public PaymentTransactionParseResult ParseResult { get; set; } = new PaymentTransactionParseResult();
+        public override async Task SaveAsync()
         {
-            return true;
+            await Task.Run(() => Save());
+        }
+
+        private void Save()
+        {
+            //Console.WriteLine(JsonSerializer.Serialize(parseResult,JsonSerializerOptions.));
+            Console.WriteLine(JsonConvert.SerializeObject(ParseResult, Formatting.Indented));
+            var b = 2;
         }
     }
 }

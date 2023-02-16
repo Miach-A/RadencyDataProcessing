@@ -9,7 +9,6 @@ namespace RadencyDataProcessing.PaymentTransactions
         private readonly PaymentTransactionFactory _paymentTransactionFactory;
         private readonly PaymentTransactionsReader _paymentTransactionsReader;
         private readonly PaymentTransactionParser _paymentTransactionsParser;
-        private readonly PaymentTransactionsHandler _paymentTransactionsHandler;
 
         public PaymentTransactionManager(
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
@@ -22,17 +21,17 @@ namespace RadencyDataProcessing.PaymentTransactions
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
             _paymentTransactionFactory = paymentTransactionFactory;
             _paymentTransactionsReader = paymentTransactionReader;
-            _paymentTransactionsHandler = paymentTransactionHandler;
             _paymentTransactionsParser = paymentTransactionParser;
         }
+
         public string InnerDataDirectory => _innerDataDirectory;
 
         public string OutgoingDataDirectory => _outgoingDataDirectory;
 
-        public PaymentTransactionsHandler Handler => _paymentTransactionsHandler;
-
         public PaymentTransactionsReader Reader => _paymentTransactionsReader;
 
         public PaymentTransactionParser Parser => _paymentTransactionsParser;
+
+        public PaymentTransactionFactory Factory => _paymentTransactionFactory;
     }
 }

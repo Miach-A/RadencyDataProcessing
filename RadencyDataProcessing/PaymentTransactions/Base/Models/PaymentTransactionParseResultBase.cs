@@ -2,6 +2,6 @@
 {
     public abstract class PaymentTransactionParseResultBase
     {
-        public IEnumerable<PaymentTransactionEntryBase> Entries { get; set; } = new List<PaymentTransactionEntryBase>();
+        public List<PaymentTransactionEntryBase> Entries { get; set; } = new List<PaymentTransactionEntryBase>();
     }
 }

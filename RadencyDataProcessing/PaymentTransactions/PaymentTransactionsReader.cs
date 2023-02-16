@@ -11,6 +11,10 @@ namespace RadencyDataProcessing
             StreamReader reader = new(path);
             string? data;
             List<string> chunk = new List<string>(chunkSize);
+            if (Path.GetExtension(path).ToLower() == ".csv")
+            {
+                data = await reader.ReadLineAsync();
+            }
 
             while (true)
             {
@@ -22,12 +26,12 @@ namespace RadencyDataProcessing
                 if (countInChunk == chunkSize)
                 {
                     countInChunk = 0;
-                    chunk.Clear();
                     yield return chunk;
+                    chunk.Clear();
                 }
             }
 
-            if (chunk.Count > 0)
+            if (chunk.Count() > 0)
             {
                 yield return chunk;
             }

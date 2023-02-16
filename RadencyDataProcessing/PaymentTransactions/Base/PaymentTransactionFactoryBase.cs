@@ -4,8 +4,8 @@
     {
         public abstract PaymentTransactionEntryBase CreatePaymentTransactionEntry();
 
-
         public abstract PaymentTransactionParseResultBase CreatePaymentTransactionReadResult();
 
+        public abstract PaymentTransactionsHandlerBase CreatePaymentTransactionsHandler(string source);
     }
 }

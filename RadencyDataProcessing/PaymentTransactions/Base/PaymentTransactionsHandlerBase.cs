@@ -1,8 +1,12 @@
 ﻿namespace RadencyDataProcessing.PaymentTransactions.Base
 {
-    public abstract class PaymentTransactionsHandlerBase<TIn>
-        where TIn : PaymentTransactionParseResultBase, new()
+    public abstract class PaymentTransactionsHandlerBase
     {
-        public abstract Task HandleAsync(TIn parseResult);
+        public PaymentTransactionsHandlerBase(string source)
+        {
+            Source = source;
+        }
+        public string Source { get; set; } = string.Empty;
+        public abstract Task SaveAsync();
     }
 }

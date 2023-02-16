@@ -56,11 +56,13 @@ namespace RadencyDataProcessing.PaymentTransactions
             if (Decimal.TryParse(strings[3], _numberFormatInfo, out decimal payment) == false) return null;
             if (DateTime.TryParseExact(strings[4], "yyyy-dd-MM", _dateTimeFormatInfo, DateTimeStyles.None, out DateTime date) == false) return null;
             if (long.TryParse(strings[5], out long accountNumber) == false) return null;
+            var citySearch = SplitIgnoreQuotes(strings[2], ",");
+            if (citySearch.Count() == 0) return null;
 
             var entry = _paymentTransactionFactory.CreatePaymentTransactionEntry();
             entry.FirstName = strings[0];
             entry.LastName = strings[1];
-            entry.Address = strings[2];
+            entry.City = citySearch[0];
             entry.Payment = payment;
             entry.Date = date;
             entry.AccountNumber = accountNumber;

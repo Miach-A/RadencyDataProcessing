@@ -26,7 +26,6 @@ try
 
             services.AddSingleton<PaymentTransactionsReader>();
             services.AddSingleton<PaymentTransactionParser>();
-            services.AddSingleton<PaymentTransactionsHandler>();
             services.AddSingleton<PaymentTransactionFactory>();
             services.AddSingleton<PaymentTransactionManager>();
             services.AddSingleton(typeof(IProcessing), typeof(PaymentTransactionsProcessing));

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using RadencyDataProcessing.Interfaces;
+﻿using RadencyDataProcessing.Interfaces;
 
 namespace RadencyDataProcessing.PaymentTransactions
 {
@@ -10,7 +9,7 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
-            IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
+            //IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
             PaymentTransactionManager paymentTransactionManager
             )
         {
@@ -36,7 +35,9 @@ namespace RadencyDataProcessing.PaymentTransactions
                 //Read files. Move to folder "in progress". While reading is in progress, can get a new list after N seconds and process it too
                 //after processing, move to the "processed" folder  
                 _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
-                var files = Directory.GetFiles(_paymentTransactionManager.InnerDataDirectory).Where(file => file.EndsWith(".txt") || file.EndsWith(".csv"));
+                var files = Directory.GetFiles(_paymentTransactionManager.InnerDataDirectory)
+                    .Where(file => Path.GetExtension(file).ToLower() == ".txt"
+                        || Path.GetExtension(file).ToLower() == ".csv");
 
                 if (files.Count() > 0)
                 {
@@ -72,13 +73,15 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         private async Task ProcessFileAsync(string file)
         {
+            var hanler = _paymentTransactionManager.Factory.CreatePaymentTransactionsHandler(file);
             var readChunks = _paymentTransactionManager.Reader.ReadAsync(file);
             await foreach (var readChunk in readChunks)
             {
                 var parsingChank = await _paymentTransactionManager.Parser.ParseAsync(readChunk);
-                await _paymentTransactionManager.Handler.HandleAsync(parsingChank);
+                hanler.ParseResult.Entries.AddRange(parsingChank.Entries);
+                hanler.ParseResult.ErrorLines.AddRange(parsingChank.ErrorLines);
             }
-
+            await hanler.SaveAsync();
         }
 
         private void CreateDirectoryIfNotExist(string directory)
