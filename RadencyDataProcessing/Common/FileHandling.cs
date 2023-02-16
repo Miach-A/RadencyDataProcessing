@@ -3,6 +3,7 @@
     public class FileHandling
     {
         private string _numberPattern = " ({0})";
+
         public string NextAvailableFilename(string path)
         {
             // Short-cut if already available
@@ -52,6 +53,11 @@
             {
                 Directory.CreateDirectory(directory);
             }
+        }
+
+        public static string NewPrefix()
+        {
+            return Guid.NewGuid().ToString() + "_";
         }
     }
 }

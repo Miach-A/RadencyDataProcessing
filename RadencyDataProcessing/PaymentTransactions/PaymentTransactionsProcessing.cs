@@ -31,7 +31,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             {
                 var filename = _fileHandling.NextAvailableFilename(
                     Path.Combine(_paymentTransactionManager.InnerDataDirectory,
-                                    Path.GetFileName(file).Substring(NewInProgressPrefix().Length)));
+                                    Path.GetFileName(file).Substring(FileHandling.NewPrefix().Length)));
                 Directory.Move(file, filename);
             }
 
@@ -53,7 +53,7 @@ namespace RadencyDataProcessing.PaymentTransactions
                     List<string> movedFiles = new List<string>(files.Count());
                     foreach (var file in files)
                     {
-                        var newFilePath = Path.Combine(InProgressDirectory, NewInProgressPrefix() + Path.GetFileName(file));
+                        var newFilePath = Path.Combine(InProgressDirectory, FileHandling.NewPrefix() + Path.GetFileName(file));
                         Directory.Move(file, newFilePath);
                         movedFiles.Add(newFilePath);
                     }
@@ -63,11 +63,6 @@ namespace RadencyDataProcessing.PaymentTransactions
 
                 await Task.Delay(1000, stoppingToken);
             }
-        }
-
-        private string NewInProgressPrefix()
-        {
-            return Guid.NewGuid().ToString() + "_";
         }
 
         private async Task ProcessFilesAsync(IEnumerable<string> files)
@@ -94,18 +89,19 @@ namespace RadencyDataProcessing.PaymentTransactions
             await hanler.SaveAsync();
         }
 
-        private void MidnightWorker(CancellationToken stoppingToken)
+        private async void MidnightWorker(CancellationToken stoppingToken)
         {
-            Task.Delay(TimeSpan.FromSeconds(SecondsTillMidnight()));
+            await Task.Delay(TimeSpan.FromSeconds(SecondsTillMidnight()));
+            await Task.CompletedTask;
 
             var handler = _paymentTransactionManager.Factory.CreatePaymentTransactionsMidnightHandler();
-            Task.Run(() => handler.MidnightWork())
+            var workerFist = Task.Run(() => handler.MidnightWork())
                 .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                Task.Delay(TimeSpan.FromHours(24));
-                Task.Run(() => handler.MidnightWork())
+                await Task.Delay(TimeSpan.FromHours(24));
+                var midnightWorker = Task.Run(() => handler.MidnightWork())
                     .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
             }
         }

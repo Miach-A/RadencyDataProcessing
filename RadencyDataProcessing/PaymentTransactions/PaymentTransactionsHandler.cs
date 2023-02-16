@@ -11,7 +11,7 @@ namespace RadencyDataProcessing
     {
         private readonly PaymentTransactionsConfiguration _paymentTransactionsConfiguration;
         private readonly FileHandling _fileHandling;
-        private string _currentDate;
+        //private string _currentDate;
         private string _outputDirectoryPath;
         private string _outputTempDirectoryPath;
         private string _inputProcessedDirectoryPath;
@@ -59,47 +59,71 @@ namespace RadencyDataProcessing
                     });
 
 
-            SetPaths();
+            SetPaths(DateTime.Now.ToString("MM-dd-yyyy"));
+
+            var tempData = new PaymentTransactionTempData()
+            {
+                ParsedLines = ParseResult.Entries.Count(),
+                FoundErrors = ParseResult.ErrorLines.Count(),
+                FileName = _inputProcessedFilePath
+            };
 
             File.WriteAllText(_outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
-
-            var tempData = new List<string>();
-            tempData.Add(ParseResult.Entries.Count().ToString());
-            tempData.Add(ParseResult.ErrorLines.Count().ToString());
-            tempData.Add(_inputProcessedFilePath);
-
-            StreamWriter writer = new StreamWriter(_outputTempFile);
-            foreach (var row in tempData)
-            {
-                writer.WriteLine(row);
-            }
-            writer.Close();
-
-            // --------------  temporarily ---------------------
+            File.WriteAllText(_outputTempFile, JsonConvert.SerializeObject(tempData, Formatting.Indented));
             File.Move(Source, _inputProcessedFilePath);
         }
 
-        private void SetPaths()
+        private void SetPaths(string date)
         {
-            _currentDate = DateTime.Now.ToString("MM-dd-yyyy");
-            _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, _currentDate.ToString());
-            _outputTempDirectoryPath = Path.Combine(_outputDirectoryPath, "temp");
+            _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, date);
+
             _inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
-
-            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source));
-
+            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source).Substring(FileHandling.NewPrefix().Length));
             _fileHandling.CreateDirectoryIfNotExist(_outputDirectoryPath);
-            _fileHandling.CreateDirectoryIfNotExist(_outputTempDirectoryPath);
-
             _outputFile = Path.Combine(_outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
-            _outputTempFile = Path.Combine(_outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.txt"));
+            SetTempDataPaths(date);
+        }
+
+        private void SetTempDataPaths(string date)
+        {
+            _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, date);
+            _outputTempDirectoryPath = Path.Combine(_outputDirectoryPath, "temp");
+            _fileHandling.CreateDirectoryIfNotExist(_outputTempDirectoryPath);
+            _outputTempFile = Path.Combine(_outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.json"));
         }
 
         public void MidnightWork()
         {
-            //await Task.CompletedTask;
+            if (Directory.Exists(_outputTempDirectoryPath))
+            {
+                return;
+            }
+            SetTempDataPaths(DateTime.Now.AddDays(-1).ToString("MM-dd-yyyy"));
 
-            //work
+
+            int totalLines = 0;
+            int errors = 0;
+            List<string> invalidFiles = new List<string>();
+            var files = Directory.GetFiles(_outputTempDirectoryPath);
+            foreach (var file in files)
+            {
+                var res = JsonConvert.DeserializeObject<PaymentTransactionTempData>(File.ReadAllText(file));
+                totalLines += res.ParsedLines;
+                errors += res.FoundErrors;
+                if (res.FoundErrors > 0)
+                {
+                    invalidFiles.Add(res.FileName);
+                }
+            }
+
+            int parsedFiles = files.Count();
+
+            StreamWriter stream = new StreamWriter(Path.Combine(_outputDirectoryPath, "meta.log"));
+            stream.WriteLine(string.Concat("parsed_files: ", parsedFiles));
+            stream.WriteLine(string.Concat("parsed_lines: ", totalLines));
+            stream.WriteLine(string.Concat("found_errors: ", errors));
+            stream.WriteLine(string.Concat("invalid_files: [", String.Join(", ", invalidFiles), "]"));
+            stream.Close();
         }
     }
 }
