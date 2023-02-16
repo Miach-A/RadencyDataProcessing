@@ -4,7 +4,6 @@
     {
         public static void HandleExeption(Task task)
         {
-
             if (task.Exception != null)
             {
                 Console.WriteLine(task.Exception?.Message);
@@ -30,4 +29,6 @@
         }
 
     }
+
 }
+

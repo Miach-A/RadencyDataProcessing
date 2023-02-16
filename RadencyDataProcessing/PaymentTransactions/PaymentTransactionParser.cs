@@ -1,4 +1,5 @@
-﻿using RadencyDataProcessing.PaymentTransactions.Models;
+﻿using RadencyDataProcessing.Common;
+using RadencyDataProcessing.PaymentTransactions.Models;
 using System.Globalization;
 
 namespace RadencyDataProcessing.PaymentTransactions
@@ -17,7 +18,9 @@ namespace RadencyDataProcessing.PaymentTransactions
         }
         public override async Task<PaymentTransactionParseResult> ParseAsync(IEnumerable<string> transaction)
         {
-            return await Task.Run(() => Parse(transaction));
+            return await Task.Run(() => Parse(transaction))
+                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted)
+                .ContinueWith((task) => new PaymentTransactionParseResult());
         }
 
         public PaymentTransactionParseResult Parse(IEnumerable<string> transaction)

@@ -31,7 +31,7 @@ namespace RadencyDataProcessing
         {
             var res = ParseResult.Entries
                 .GroupBy(entry => new { entry.Service, entry.City })
-                .GroupBy(group => group.Key.City)
+                .GroupBy(groupService => groupService.Key.City)
                     .Select(groupCity => new
                     {
                         city = groupCity.Key,
@@ -78,7 +78,7 @@ namespace RadencyDataProcessing
             writer.Close();
 
             // --------------  temporarily ---------------------
-            //File.Move(Source, inputProcessedFilePath);
+            File.Move(Source, inputProcessedFilePath);
         }
     }
 }

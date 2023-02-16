@@ -36,7 +36,7 @@ namespace RadencyDataProcessing
                 yield return chunk;
             }
 
-            reader.Dispose();
+            //reader.Dispose();
 
         }
 

@@ -73,7 +73,8 @@ namespace RadencyDataProcessing.PaymentTransactions
 
             foreach (var file in files)
             {
-                var ParallelProcessing = Task.Run(() => ProcessFileAsync(file));
+                var ParallelProcessing = Task.Run(() => ProcessFileAsync(file))
+                    .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -89,7 +90,6 @@ namespace RadencyDataProcessing.PaymentTransactions
             }
             await hanler.SaveAsync();
         }
-
 
     }
 }
