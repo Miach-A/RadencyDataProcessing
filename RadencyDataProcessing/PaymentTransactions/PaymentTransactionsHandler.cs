@@ -23,7 +23,8 @@ namespace RadencyDataProcessing
 
         public override async Task SaveAsync()
         {
-            await Task.Run(() => Save());
+            await Task.Run(() => Save())
+                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void Save()
@@ -54,9 +55,7 @@ namespace RadencyDataProcessing
             var outputTempDirectoryPath = Path.Combine(outputDirectoryPath, "temp");
             var inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
 
-            var inputFileNewPath = Path.Combine(inputProcessedDirectoryPath, Path.GetFileName(Source));
-
-            //File.Move(Source, inputFileNewPath);
+            var inputProcessedFilePath = Path.Combine(inputProcessedDirectoryPath, Path.GetFileName(Source));
 
             _fileHandling.CreateDirectoryIfNotExist(outputDirectoryPath);
             _fileHandling.CreateDirectoryIfNotExist(outputTempDirectoryPath);
@@ -64,13 +63,12 @@ namespace RadencyDataProcessing
             var outputFile = Path.Combine(outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
             var outputTempFile = Path.Combine(outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.txt"));
 
-
             File.WriteAllText(outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
 
             var tempData = new List<string>();
             tempData.Add(ParseResult.Entries.Count().ToString());
             tempData.Add(ParseResult.ErrorLines.Count().ToString());
-            tempData.Add(inputFileNewPath);
+            tempData.Add(inputProcessedFilePath);
 
             StreamWriter writer = new StreamWriter(outputTempFile);
             foreach (var row in tempData)
@@ -78,6 +76,9 @@ namespace RadencyDataProcessing
                 writer.WriteLine(row);
             }
             writer.Close();
+
+            // --------------  temporarily ---------------------
+            //File.Move(Source, inputProcessedFilePath);
         }
     }
 }
