@@ -14,8 +14,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
             PaymentTransactionFactory paymentTransactionFactory,
             PaymentTransactionsReader paymentTransactionReader,
-            PaymentTransactionParser paymentTransactionParser,
-            PaymentTransactionsHandler paymentTransactionHandler)
+            PaymentTransactionParser paymentTransactionParser)
         {
             _innerDataDirectory = PaymentTransactionsConfiguration.Value.InnerDataDirectory;
             _outgoingDataDirectory = PaymentTransactionsConfiguration.Value.OutgoingDataDirectory;
