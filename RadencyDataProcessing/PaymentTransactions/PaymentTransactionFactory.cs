@@ -5,6 +5,11 @@ namespace RadencyDataProcessing.PaymentTransactions
 {
     public class PaymentTransactionFactory : PaymentTransactionFactoryBase
     {
+        private IServiceProvider _serviceProvider;
+        public PaymentTransactionFactory(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider;
+        }
         public override PaymentTransactionEntry CreatePaymentTransactionEntry()
         {
             return new PaymentTransactionEntry();
@@ -17,7 +22,9 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         public override PaymentTransactionsHandler CreatePaymentTransactionsHandler(string source)
         {
-            return new PaymentTransactionsHandler(source);
+            PaymentTransactionsHandler handler = (PaymentTransactionsHandler)_serviceProvider.GetService(typeof(PaymentTransactionsHandler))!;
+            handler.Source = source;
+            return handler;
         }
     }
 }

@@ -31,16 +31,15 @@ namespace RadencyDataProcessing.PaymentTransactions
             {
                 var filename = _fileHandling.NextAvailableFilename(
                     Path.Combine(_paymentTransactionManager.InnerDataDirectory,
-                                    Path.GetFileName(file).Substring(NewInProgressPrefix().Length))); // or magic numbers antipattern 37 = Guid.NewGuid() + "_"
+                                    Path.GetFileName(file).Substring(NewInProgressPrefix().Length)));
                 Directory.Move(file, filename);
             }
 
             var ProcessedDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "Processed");
             CreateDirectoryIfNotExist(ProcessedDirectory);
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                //Read files. Move to folder "in progress". While reading is in progress, can get a new list after N seconds and process it too
-                //after processing, move to the "processed" folder  
                 _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
                 var files = Directory.GetFiles(_paymentTransactionManager.InnerDataDirectory)
                     .Where(file => Path.GetExtension(file).ToLower() == ".txt"

@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using RadencyDataProcessing.Common;
+using RadencyDataProcessing.PaymentTransactions;
 using RadencyDataProcessing.PaymentTransactions.Base;
 using RadencyDataProcessing.PaymentTransactions.Models;
 
@@ -6,11 +9,18 @@ namespace RadencyDataProcessing
 {
     public class PaymentTransactionsHandler : PaymentTransactionsHandlerBase
     {
-        public PaymentTransactionsHandler(string source) : base(source)
+        private readonly PaymentTransactionsConfiguration _paymentTransactionsConfiguration;
+        private readonly FileHandling _fileHandling;
+        public PaymentTransactionsHandler(
+            IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
+            FileHandling fileHandling)
         {
+            _paymentTransactionsConfiguration = PaymentTransactionsConfiguration.Value;
+            _fileHandling = fileHandling;
         }
 
         public PaymentTransactionParseResult ParseResult { get; set; } = new PaymentTransactionParseResult();
+
         public override async Task SaveAsync()
         {
             await Task.Run(() => Save());
@@ -39,7 +49,12 @@ namespace RadencyDataProcessing
                         total = groupCity.Sum(groupService => groupService.Sum(entry => entry.Payment))
                     });
 
-            Console.WriteLine(JsonConvert.SerializeObject(res, Formatting.Indented));
+            var currentDate = DateTime.Now.ToString("MM-dd-yyyy");
+            var fileOutputfile = _fileHandling.NextAvailableFilename(Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, currentDate.ToString(), "output.json"));
+            Console.WriteLine(fileOutputfile);
+            File.WriteAllText(fileOutputfile, JsonConvert.SerializeObject(res, Formatting.Indented));
+
+            //Console.WriteLine(JsonConvert.SerializeObject(res, Formatting.Indented));
             var b = 2;
         }
     }

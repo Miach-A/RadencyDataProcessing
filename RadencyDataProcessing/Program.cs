@@ -25,6 +25,8 @@ try
                 }
             });
 
+            services.AddTransient<PaymentTransactionsHandler>();
+
             services.AddSingleton<FileHandling>();
             services.AddSingleton<PaymentTransactionsReader>();
             services.AddSingleton<PaymentTransactionParser>();
