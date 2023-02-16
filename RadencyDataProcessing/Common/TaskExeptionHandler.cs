@@ -6,28 +6,34 @@
         {
             if (task.Exception != null)
             {
-                Console.WriteLine(task.Exception?.Message);
-                if (task.Exception?.StackTrace != null)
-                {
-                    Console.WriteLine(task.Exception?.Message);
-                }
+                LogException(task.Exception);
+            }
+        }
 
-                if (task.Exception?.InnerExceptions.Count() == 0)
+        public static void LogException(Exception exception)
+        {
+            Console.WriteLine(exception.Message);
+            if (exception.StackTrace != null)
+            {
+                Console.WriteLine(exception.StackTrace);
+            }
+
+            if (exception is AggregateException aggregateException)
+            {
+                if (aggregateException.InnerExceptions.Count() == 0)
                 {
                     return;
                 }
 
-                foreach (var innerTask in task.Exception!.InnerExceptions)
+                foreach (var innerTask in aggregateException.InnerExceptions)
                 {
                     if (innerTask.StackTrace != null)
                     {
                         Console.WriteLine(innerTask.StackTrace);
                     }
                 }
-
             }
         }
-
     }
 
 }
