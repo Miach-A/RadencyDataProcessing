@@ -46,7 +46,7 @@ namespace RadencyDataProcessing.PaymentTransactions
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
+                //_logger.LogInformation("Process files running at: {time}", DateTimeOffset.Now);
                 var files = Directory.GetFiles(_paymentTransactionManager.InnerDataDirectory)
                     .Where(file => Path.GetExtension(file).ToLower() == ".txt"
                         || Path.GetExtension(file).ToLower() == ".csv");
@@ -94,10 +94,12 @@ namespace RadencyDataProcessing.PaymentTransactions
 
         private async void MidnightWorker(CancellationToken stoppingToken)
         {
-            await Task.Delay(TimeSpan.FromSeconds(SecondsTillMidnight()));
-
             var handler = _paymentTransactionManager.Factory.CreatePaymentTransactionsMidnightHandler();
-            var workerFist = Task.Run(() => handler.MidnightWork())
+            var workerCheckYesterday = Task.Run(() => handler.MidnightWork())
+               .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+
+            await Task.Delay(TimeSpan.FromSeconds(SecondsTillMidnight()));
+            var workerFistMidnightWorker = Task.Run(() => handler.MidnightWork())
                 .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
 
             while (!stoppingToken.IsCancellationRequested)

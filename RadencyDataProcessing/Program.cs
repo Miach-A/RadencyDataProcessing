@@ -3,9 +3,18 @@ using RadencyDataProcessing.Common;
 using RadencyDataProcessing.Extensions;
 using RadencyDataProcessing.Interfaces;
 using RadencyDataProcessing.PaymentTransactions;
+using Serilog;
 
 try
 {
+    var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+    Log.Logger = new LoggerConfiguration()
+        .ReadFrom.Configuration(configuration)
+        .CreateLogger();
+
     IHost host = Host.CreateDefaultBuilder(args)
 
         .ConfigureServices((context, services) =>
@@ -36,11 +45,16 @@ try
             services.AddSingleton(typeof(IProcessing), typeof(PaymentTransactionsProcessing));
             services.AddHostedService<Worker>();
         })
+        .UseSerilog()
         .Build();
 
     host.Run();
 }
 catch (ApplicationException ex)
 {
-    Console.WriteLine(ex.Message);
+    Log.Fatal(ex.Message);
+}
+finally
+{
+    Log.CloseAndFlush();
 }
