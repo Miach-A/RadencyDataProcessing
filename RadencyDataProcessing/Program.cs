@@ -16,7 +16,7 @@ try
         .CreateLogger();
 
     IHost host = Host.CreateDefaultBuilder(args)
-
+        .UseWindowsService()
         .ConfigureServices((context, services) =>
         {
             services.Configure<PaymentTransactionsConfiguration>(context.Configuration.GetSection("PaymentTransactions"));
