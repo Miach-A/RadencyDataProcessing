@@ -27,7 +27,8 @@ try
 
             services.AddTransient<PaymentTransactionsHandler>();
 
-            services.AddSingleton<FileHandling>();
+            services.AddSingleton<TaskExceptionHandler>();
+            services.AddSingleton<FileHandler>();
             services.AddSingleton<PaymentTransactionsReader>();
             services.AddSingleton<PaymentTransactionParser>();
             services.AddSingleton<PaymentTransactionFactory>();

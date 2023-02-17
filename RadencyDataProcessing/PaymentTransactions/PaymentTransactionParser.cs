@@ -9,13 +9,17 @@ namespace RadencyDataProcessing.PaymentTransactions
         private readonly NumberFormatInfo _numberFormatInfo;
         private readonly DateTimeFormatInfo _dateTimeFormatInfo;
         private readonly PaymentTransactionFactory _paymentTransactionFactory;
+        private readonly TaskExceptionHandler _taskExceptionHandler;
 
-        public PaymentTransactionParser(PaymentTransactionFactory transactionFactory)
+        public PaymentTransactionParser(
+            PaymentTransactionFactory transactionFactory,
+            TaskExceptionHandler taskExceptionHandler)
         {
             _paymentTransactionFactory = transactionFactory;
             _numberFormatInfo = new NumberFormatInfo();
             _numberFormatInfo.NumberDecimalSeparator = ".";
             _dateTimeFormatInfo = new DateTimeFormatInfo();
+            _taskExceptionHandler = taskExceptionHandler;
         }
         public override async Task<PaymentTransactionParseResult> ParseAsync(IEnumerable<string> transaction)
         {
@@ -25,7 +29,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             }
             catch (Exception ex)
             {
-                TaskExceptionHandler.LogException(ex);
+                _taskExceptionHandler.LogException(ex);
                 throw new AggregateException(ex);
             }
         }

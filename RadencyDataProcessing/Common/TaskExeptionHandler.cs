@@ -1,8 +1,14 @@
 ﻿namespace RadencyDataProcessing.Common
 {
-    public static class TaskExceptionHandler
+    public class TaskExceptionHandler
     {
-        public static void HandleExeption(Task task)
+        private readonly ILogger<TaskExceptionHandler> _loger;
+        public TaskExceptionHandler(
+            ILogger<TaskExceptionHandler> logger)
+        {
+            _loger = logger;
+        }
+        public void HandleExeption(Task task)
         {
             if (task.Exception != null)
             {
@@ -10,12 +16,12 @@
             }
         }
 
-        public static void LogException(Exception exception)
+        public void LogException(Exception exception)
         {
-            Console.WriteLine(exception.Message);
+            _loger.LogError(exception.Message);
             if (exception.StackTrace != null)
             {
-                Console.WriteLine(exception.StackTrace);
+                _loger.LogError(exception.StackTrace);
             }
 
             if (exception is AggregateException aggregateException)
@@ -25,11 +31,12 @@
                     return;
                 }
 
-                foreach (var innerTask in aggregateException.InnerExceptions)
+                foreach (var innerException in aggregateException.InnerExceptions)
                 {
-                    if (innerTask.StackTrace != null)
+                    _loger.LogError(innerException.Message);
+                    if (innerException.StackTrace != null)
                     {
-                        Console.WriteLine(innerTask.StackTrace);
+                        _loger.LogError(innerException.StackTrace);
                     }
                 }
             }

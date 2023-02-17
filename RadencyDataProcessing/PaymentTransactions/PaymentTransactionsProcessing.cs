@@ -7,39 +7,42 @@ namespace RadencyDataProcessing.PaymentTransactions
     {
         private readonly ILogger<Worker> _logger;
         private readonly PaymentTransactionManager _paymentTransactionManager;
-        private readonly FileHandling _fileHandling;
+        private readonly FileHandler _fileHandler;
+        private readonly TaskExceptionHandler _taskExceptionHandler;
 
         public PaymentTransactionsProcessing(
             ILogger<Worker> logger,
             PaymentTransactionManager paymentTransactionManager,
-            FileHandling fileHandling
+            FileHandler fileHandler,
+            TaskExceptionHandler taskExceptionHandler
             )
         {
             _logger = logger;
             _paymentTransactionManager = paymentTransactionManager;
-            _fileHandling = fileHandling;
+            _fileHandler = fileHandler;
+            _taskExceptionHandler = taskExceptionHandler;
 
         }
 
         public async Task Processing(CancellationToken stoppingToken)
         {
             var InProgressDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "InProgress");
-            _fileHandling.CreateDirectoryIfNotExist(InProgressDirectory);
+            _fileHandler.CreateDirectoryIfNotExist(InProgressDirectory);
 
             var filesNotProcessedLastTime = Directory.GetFiles(InProgressDirectory);
             foreach (var file in filesNotProcessedLastTime)
             {
-                var filename = _fileHandling.NextAvailableFilename(
+                var filename = _fileHandler.NextAvailableFilename(
                     Path.Combine(_paymentTransactionManager.InnerDataDirectory,
-                                    Path.GetFileName(file).Substring(FileHandling.NewPrefix().Length)));
+                                    Path.GetFileName(file).Substring(_fileHandler.NewPrefix().Length)));
                 Directory.Move(file, filename);
             }
 
             var ProcessedDirectory = Path.Combine(_paymentTransactionManager.InnerDataDirectory, "Processed");
-            _fileHandling.CreateDirectoryIfNotExist(ProcessedDirectory);
+            _fileHandler.CreateDirectoryIfNotExist(ProcessedDirectory);
 
             var midnightWorker = Task.Run(() => MidnightWorker(stoppingToken))
-                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+                .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
 
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -53,7 +56,7 @@ namespace RadencyDataProcessing.PaymentTransactions
                     List<string> movedFiles = new List<string>(files.Count());
                     foreach (var file in files)
                     {
-                        var newFilePath = Path.Combine(InProgressDirectory, FileHandling.NewPrefix() + Path.GetFileName(file));
+                        var newFilePath = Path.Combine(InProgressDirectory, _fileHandler.NewPrefix() + Path.GetFileName(file));
                         Directory.Move(file, newFilePath);
                         movedFiles.Add(newFilePath);
                     }
@@ -72,7 +75,7 @@ namespace RadencyDataProcessing.PaymentTransactions
             foreach (var file in files)
             {
                 var fileWorker = Task.Run(() => ProcessFileAsync(file))
-                    .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+                    .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 
@@ -92,17 +95,16 @@ namespace RadencyDataProcessing.PaymentTransactions
         private async void MidnightWorker(CancellationToken stoppingToken)
         {
             await Task.Delay(TimeSpan.FromSeconds(SecondsTillMidnight()));
-            await Task.CompletedTask;
 
             var handler = _paymentTransactionManager.Factory.CreatePaymentTransactionsMidnightHandler();
             var workerFist = Task.Run(() => handler.MidnightWork())
-                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+                .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 await Task.Delay(TimeSpan.FromHours(24));
                 var midnightWorker = Task.Run(() => handler.MidnightWork())
-                    .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+                    .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
             }
         }
 

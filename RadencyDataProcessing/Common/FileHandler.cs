@@ -1,6 +1,6 @@
 ﻿namespace RadencyDataProcessing.Common
 {
-    public class FileHandling
+    public class FileHandler
     {
         private string _numberPattern = " ({0})";
 
@@ -55,7 +55,7 @@
             }
         }
 
-        public static string NewPrefix()
+        public string NewPrefix()
         {
             return Guid.NewGuid().ToString() + "_";
         }

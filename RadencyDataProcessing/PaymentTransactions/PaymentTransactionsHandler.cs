@@ -10,7 +10,8 @@ namespace RadencyDataProcessing
     public class PaymentTransactionsHandler : PaymentTransactionsHandlerBase
     {
         private readonly PaymentTransactionsConfiguration _paymentTransactionsConfiguration;
-        private readonly FileHandling _fileHandling;
+        private readonly FileHandler _fileHandler;
+        private readonly TaskExceptionHandler _taskExceptionHandler;
         private string _outputDirectoryPath = string.Empty;
         private string _outputTempDirectoryPath = string.Empty;
         private string _inputProcessedDirectoryPath = string.Empty;
@@ -20,10 +21,12 @@ namespace RadencyDataProcessing
 
         public PaymentTransactionsHandler(
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
-            FileHandling fileHandling)
+            FileHandler fileHandler,
+            TaskExceptionHandler taskExceptionHandler)
         {
             _paymentTransactionsConfiguration = PaymentTransactionsConfiguration.Value;
-            _fileHandling = fileHandling;
+            _fileHandler = fileHandler;
+            _taskExceptionHandler = taskExceptionHandler;
         }
 
         public PaymentTransactionParseResult ParseResult { get; set; } = new PaymentTransactionParseResult();
@@ -31,7 +34,7 @@ namespace RadencyDataProcessing
         public override async Task SaveAsync()
         {
             await Task.Run(() => Save())
-                .ContinueWith(task => TaskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
+                .ContinueWith(task => _taskExceptionHandler.HandleExeption(task), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         private void Save()
@@ -88,8 +91,8 @@ namespace RadencyDataProcessing
                     if (File.Exists(_inputProcessedFilePath)) File.Move(_inputProcessedFilePath, Source);
                     if (File.Exists(Source))
                     {
-                        var fileName = _fileHandling.NextAvailableFilename(Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory,
-                                                                                        Path.GetFileName(Source).Substring(FileHandling.NewPrefix().Length)));
+                        var fileName = _fileHandler.NextAvailableFilename(Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory,
+                                                                                        Path.GetFileName(Source).Substring(_fileHandler.NewPrefix().Length)));
                         File.Move(Source, fileName);
                     }
                 }
@@ -102,8 +105,8 @@ namespace RadencyDataProcessing
             _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, date);
 
             _inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
-            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source).Substring(FileHandling.NewPrefix().Length));
-            _fileHandling.CreateDirectoryIfNotExist(_outputDirectoryPath);
+            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source).Substring(_fileHandler.NewPrefix().Length));
+            _fileHandler.CreateDirectoryIfNotExist(_outputDirectoryPath);
             _outputFile = Path.Combine(_outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
             SetTempDataPaths(date);
         }
@@ -112,7 +115,7 @@ namespace RadencyDataProcessing
         {
             _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, date);
             _outputTempDirectoryPath = Path.Combine(_outputDirectoryPath, "temp");
-            _fileHandling.CreateDirectoryIfNotExist(_outputTempDirectoryPath);
+            _fileHandler.CreateDirectoryIfNotExist(_outputTempDirectoryPath);
             _outputTempFile = Path.Combine(_outputTempDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-temp.json"));
         }
 
