@@ -11,13 +11,12 @@ namespace RadencyDataProcessing
     {
         private readonly PaymentTransactionsConfiguration _paymentTransactionsConfiguration;
         private readonly FileHandling _fileHandling;
-        //private string _currentDate;
-        private string _outputDirectoryPath;
-        private string _outputTempDirectoryPath;
-        private string _inputProcessedDirectoryPath;
-        private string _inputProcessedFilePath;
-        private string _outputFile;
-        private string _outputTempFile;
+        private string _outputDirectoryPath = string.Empty;
+        private string _outputTempDirectoryPath = string.Empty;
+        private string _inputProcessedDirectoryPath = string.Empty;
+        private string _inputProcessedFilePath = string.Empty;
+        private string _outputFile = string.Empty;
+        private string _outputTempFile = string.Empty;
 
         public PaymentTransactionsHandler(
             IOptions<PaymentTransactionsConfiguration> PaymentTransactionsConfiguration,
@@ -37,6 +36,8 @@ namespace RadencyDataProcessing
 
         private void Save()
         {
+            SetPaths(DateTime.Now.ToString("MM-dd-yyyy"));
+
             var res = ParseResult.Entries
                 .GroupBy(entry => new { entry.Service, entry.City })
                 .GroupBy(groupService => groupService.Key.City)
@@ -58,9 +59,6 @@ namespace RadencyDataProcessing
                         total = groupCity.Sum(groupService => groupService.Sum(entry => entry.Payment))
                     });
 
-
-            SetPaths(DateTime.Now.ToString("MM-dd-yyyy"));
-
             var tempData = new PaymentTransactionTempData()
             {
                 ParsedLines = ParseResult.Entries.Count(),
@@ -68,9 +66,35 @@ namespace RadencyDataProcessing
                 FileName = _inputProcessedFilePath
             };
 
-            File.WriteAllText(_outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
-            File.WriteAllText(_outputTempFile, JsonConvert.SerializeObject(tempData, Formatting.Indented));
-            File.Move(Source, _inputProcessedFilePath);
+            var rollback = false;
+            try
+            {
+                File.WriteAllText(_outputFile, JsonConvert.SerializeObject(res, Formatting.Indented));
+                File.WriteAllText(_outputTempFile, JsonConvert.SerializeObject(tempData, Formatting.Indented));
+                File.Move(Source, _inputProcessedFilePath);
+                throw new ApplicationException();
+            }
+            catch (Exception ex)
+            {
+                rollback = true;
+                throw new AggregateException(ex);
+            }
+            finally
+            {
+                if (rollback)
+                {
+                    if (File.Exists(_outputFile)) File.Delete(_outputFile);
+                    if (File.Exists(_outputTempFile)) File.Delete(_outputTempFile);
+                    if (File.Exists(_inputProcessedFilePath)) File.Move(_inputProcessedFilePath, Source);
+                    if (File.Exists(Source))
+                    {
+                        var fileName = _fileHandling.NextAvailableFilename(Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory,
+                                                                                        Path.GetFileName(Source).Substring(FileHandling.NewPrefix().Length)));
+                        File.Move(Source, fileName);
+                    }
+                }
+            }
+
         }
 
         private void SetPaths(string date)
@@ -94,12 +118,13 @@ namespace RadencyDataProcessing
 
         public void MidnightWork()
         {
-            if (Directory.Exists(_outputTempDirectoryPath))
+            SetTempDataPaths(DateTime.Now.AddDays(-1).ToString("MM-dd-yyyy"));
+
+            var metaFile = Path.Combine(_outputDirectoryPath, "meta.log");
+            if (File.Exists(metaFile))
             {
                 return;
             }
-            SetTempDataPaths(DateTime.Now.AddDays(-1).ToString("MM-dd-yyyy"));
-
 
             int totalLines = 0;
             int errors = 0;
@@ -108,6 +133,7 @@ namespace RadencyDataProcessing
             foreach (var file in files)
             {
                 var res = JsonConvert.DeserializeObject<PaymentTransactionTempData>(File.ReadAllText(file));
+                if (res == null) continue;
                 totalLines += res.ParsedLines;
                 errors += res.FoundErrors;
                 if (res.FoundErrors > 0)
@@ -118,12 +144,14 @@ namespace RadencyDataProcessing
 
             int parsedFiles = files.Count();
 
-            StreamWriter stream = new StreamWriter(Path.Combine(_outputDirectoryPath, "meta.log"));
+            StreamWriter stream = new StreamWriter(metaFile);
             stream.WriteLine(string.Concat("parsed_files: ", parsedFiles));
             stream.WriteLine(string.Concat("parsed_lines: ", totalLines));
             stream.WriteLine(string.Concat("found_errors: ", errors));
             stream.WriteLine(string.Concat("invalid_files: [", String.Join(", ", invalidFiles), "]"));
             stream.Close();
+
+            Directory.Delete(_outputTempDirectoryPath, true);
         }
     }
 }
