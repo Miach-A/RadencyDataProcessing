@@ -144,14 +144,35 @@ namespace RadencyDataProcessing
 
             int parsedFiles = files.Count();
 
-            StreamWriter stream = new StreamWriter(metaFile);
-            stream.WriteLine(string.Concat("parsed_files: ", parsedFiles));
-            stream.WriteLine(string.Concat("parsed_lines: ", totalLines));
-            stream.WriteLine(string.Concat("found_errors: ", errors));
-            stream.WriteLine(string.Concat("invalid_files: [", String.Join(", ", invalidFiles), "]"));
-            stream.Close();
+            var rollback = false;
+            try
+            {
+                StreamWriter stream = new StreamWriter(metaFile);
+                stream.WriteLine(string.Concat("parsed_files: ", parsedFiles));
+                stream.WriteLine(string.Concat("parsed_lines: ", totalLines));
+                stream.WriteLine(string.Concat("found_errors: ", errors));
+                stream.WriteLine(string.Concat("invalid_files: [", String.Join(", ", invalidFiles), "]"));
+                stream.Close();
+            }
+            catch (Exception ex)
+            {
+                rollback = true;
+                throw new AggregateException(ex);
+            }
+            finally
+            {
+                if (rollback)
+                {
+                    if (File.Exists(metaFile)) File.Delete(metaFile);
+                }
+                else
+                {
+                    Directory.Delete(_outputTempDirectoryPath, true);
+                }
+            }
 
-            Directory.Delete(_outputTempDirectoryPath, true);
+
+
         }
     }
 }
