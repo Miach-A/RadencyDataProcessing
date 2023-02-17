@@ -102,7 +102,7 @@ namespace RadencyDataProcessing
         {
             _outputDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.OutgoingDataDirectory, date);
             _inputProcessedDirectoryPath = Path.Combine(_paymentTransactionsConfiguration.InnerDataDirectory, "Processed");
-            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source)); //Substring(_fileHandler.NewPrefix().Length)
+            _inputProcessedFilePath = Path.Combine(_inputProcessedDirectoryPath, Path.GetFileName(Source));
             _fileHandler.CreateDirectoryIfNotExist(_outputDirectoryPath);
             _outputFile = Path.Combine(_outputDirectoryPath, string.Concat(Guid.NewGuid().ToString(), "-output.json"));
             SetTempDataPaths(date);
