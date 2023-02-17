@@ -1,20 +1,38 @@
+using RadencyDataProcessing.Interfaces;
+
 namespace RadencyDataProcessing
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
+        private readonly IHostApplicationLifetime _hostApplicationLifetime;
+        private readonly IProcessing _paymentTransactionsProcessing;
 
-        public Worker(ILogger<Worker> logger)
+        public Worker(
+            ILogger<Worker> logger,
+            IHostApplicationLifetime hostApplicationLifetime,
+            IProcessing paymentTransactionsProcessing)
         {
             _logger = logger;
+            _hostApplicationLifetime = hostApplicationLifetime;
+            _paymentTransactionsProcessing = paymentTransactionsProcessing;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-                await Task.Delay(1000, stoppingToken);
+                await Task.WhenAll(
+                    _paymentTransactionsProcessing.Processing(stoppingToken)
+                    );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical("{exeption}{info}", "Unhandling exception. ", ex.Message);
+            }
+            finally
+            {
+                _hostApplicationLifetime.StopApplication();
             }
         }
     }
